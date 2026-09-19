@@ -7,7 +7,7 @@ import { buildSchedule } from '../../quantities/engine.js';
 import '../../quantities/label-i18n.js';
 import { getMeasureScale } from '../../annotations/measurement.js';
 import { countTallies } from './countStore.js';
-import { scheduleVisible, setScheduleVisible, toggleSchedule } from './scheduleStore.js';
+import { scheduleVisible, setScheduleVisible, toggleSchedule, scheduleDocked, setScheduleDocked } from './scheduleStore.js';
 
 // Lijnvormige annotatietypes zónder eigen measureValue: hun lengte moet uit de
 // geometrie + document-schaal komen (net als de meet-tools). measureDistance/
@@ -56,8 +56,11 @@ const [selectedCategories, setSelectedCategories] = createSignal(['area', 'line-
 // je zag wat je getekend had.
 const [scheduledFields, setScheduledFields] = createSignal(['type', 'page', 'label', 'area', 'length', 'count']);
 const [filters, setFilters] = createSignal([]);
+// Groeperen op de NAAM van het gereedschap, niet op categorie: dat is de
+// Subject-kolom waarop de markup-lijst in Bluebeam groepeert, en het is de
+// post die de calculator straks in zijn begroting overneemt.
 const [sortLevels, setSortLevels] = createSignal([
-  { field: 'category', dir: 'asc', group: true, header: true, footer: true },
+  { field: 'label', dir: 'asc', group: true, header: true, footer: true },
 ]);
 const [itemize, setItemize] = createSignal(true);
 const [grandTotals, setGrandTotals] = createSignal(true);
@@ -139,4 +142,5 @@ export {
   propertiesVisible, setPropertiesVisible,
   builtInText,
   scheduleVisible, setScheduleVisible, toggleSchedule,
+  scheduleDocked, setScheduleDocked,
 };

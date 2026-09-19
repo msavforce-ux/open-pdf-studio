@@ -604,7 +604,9 @@
       "stavenreeks": "Stavenreeks",
       "scheduleTable": "Hoeveelheden-tabel",
       "builtinText": "Tekst"
-    }
+    },
+    "dock": "Onderin vastzetten",
+    "undock": "Los venster"
   },
   "parametricSymbol": {
     "defaultTitle": "Parametric symbol",

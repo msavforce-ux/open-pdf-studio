@@ -5,6 +5,22 @@ import { savePreferences } from '../../core/preferences.js';
 
 // --- State ---
 const [scheduleVisible, setScheduleVisible] = createSignal(false);
+// Gedockt onderin over de volle breedte, zoals de markup-lijst in Bluebeam:
+// de kolommen (naam, lengte, oppervlak, aantal) passen alleen zo naast elkaar.
+// Wie liever een zwevend venster heeft, klikt het los — de keuze blijft staan.
+const [scheduleDocked, setScheduleDockedRaw] = createSignal(true);
+
+export function initScheduleDock() {
+  const v = state.preferences?.scheduleDocked;
+  if (typeof v === 'boolean') setScheduleDockedRaw(v);
+}
+
+export function setScheduleDocked(v) {
+  const aan = Boolean(v);
+  setScheduleDockedRaw(aan);
+  state.preferences.scheduleDocked = aan;
+  savePreferences();
+}
 const [groupBy, setGroupBy] = createSignal('type'); // 'type' | 'page' | 'label'
 const [filterType, setFilterType] = createSignal('all'); // 'all' | 'measureDistance' | 'measureArea' | 'measurePerimeter' | 'measureAngle'
 const [filterPage, setFilterPage] = createSignal(0); // 0 = all pages
@@ -183,6 +199,7 @@ export function toggleSchedule() {
 
 export {
   scheduleVisible, setScheduleVisible,
+  scheduleDocked,
   groupBy, setGroupBy,
   filterType, setFilterType,
   filterPage, setFilterPage,

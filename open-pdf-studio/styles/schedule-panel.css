@@ -313,3 +313,38 @@
   text-align: right;
   flex-shrink: 0;
 }
+
+/* ===== Gedockt onderin, zoals de markup-lijst in Bluebeam =====
+   Volle breedte onder het contentgebied: alleen zo passen de kolommen
+   (naam, blad, lengte, oppervlak, aantal) naast elkaar in beeld. */
+.schedule-gedockt {
+  flex-shrink: 0;
+  height: 260px;
+  min-height: 90px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  resize: vertical;
+  font-size: 11px;
+  color: var(--theme-text, #333);
+  background: var(--theme-panel-bg);
+  border-top: 1px solid var(--theme-panel-border);
+}
+
+.schedule-gedockt .modal-header {
+  cursor: default;  /* niets te slepen als het vastzit */
+}
+
+.schedule-gedockt .schedule-body {
+  flex: 1;
+  overflow: auto;
+}
+
+/* De kop blijft staan bij het scrollen door een lange lijst. */
+.schedule-gedockt .schedule-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--theme-panel-tab-bg, #f5f5f5);
+}

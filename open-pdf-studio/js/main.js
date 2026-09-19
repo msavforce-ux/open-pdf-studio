@@ -29,6 +29,8 @@ import { initDomElements } from './ui/dom-elements.js';
 import { initPropertiesPanel } from './ui/panels/properties-panel.js';
 import { initToolPalette } from './solid/components/ToolPalette.jsx';
 import { initSymbolPalette } from './solid/stores/symbolStore.js';
+import { initLeftPanelSide, migreerMeetIndeling } from './solid/stores/leftPanelStore.js';
+import { initScheduleDock } from './solid/stores/scheduleStore.js';
 import { initSteelCatalogs } from './symbols/steel-catalog-store.js';
 import { initLineworkCatalogs } from './symbols/linework-catalog-store.js';
 import { initPaletteOrder } from './solid/stores/paletteOrder.js';
@@ -232,9 +234,14 @@ async function init() {
   initPropertiesPanel();
 
   // Restore tool palette visibility, mode and position from preferences
+  // Vóór de paletten: zet de meet-indeling klaar in de voorkeuren, zodat de
+  // inits hieronder die meteen lezen.
+  migreerMeetIndeling();
   initPaletteOrder();
   initToolPalette();
   initSymbolPalette();
+  initLeftPanelSide();
+  initScheduleDock();
 
   // Re-register downloaded parametric steel catalogs from preferences so the
   // palette entries (parametricId) resolve to templates after a restart.

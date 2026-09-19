@@ -604,7 +604,9 @@
       "stavenreeks": "Bar series",
       "scheduleTable": "Quantities table",
       "builtinText": "Text"
-    }
+    },
+    "dock": "Dock at the bottom",
+    "undock": "Float"
   },
   "parametricSymbol": {
     "defaultTitle": "Parametric symbol",

@@ -32,7 +32,9 @@ import AssistantPanel from './components/AssistantPanel.jsx';
 import { getRegisteredPalettes } from '../plugins/palette-registry.js';
 import { leftOrder, rightOrder } from './stores/paletteOrder.js';
 import { useTranslation } from '../i18n/useTranslation.js';
-import { For, ErrorBoundary } from 'solid-js';
+import { For, Show, ErrorBoundary } from 'solid-js';
+import { panelSide } from './stores/leftPanelStore.js';
+import { scheduleDocked } from './stores/scheduleStore.js';
 
 function OrderedDockedPalettes(props) {
   const order = () => props.side === 'left' ? leftOrder() : rightOrder();
@@ -81,7 +83,7 @@ function DesktopApp() {
       <DocumentTabs />
 
       <div class="content">
-        <LeftPanel />
+        <Show when={panelSide() !== 'right'}><LeftPanel /></Show>
         <ElementVisibilityPanel />
         <OrderedDockedPalettes side="left" />
 
@@ -122,7 +124,12 @@ function DesktopApp() {
 
         <OrderedDockedPalettes side="right" />
         <PropertiesPanel />
+        {/* Buitenste kolom rechts: de tabstrip blijft tegen de vensterrand
+            staan, ook als het eigenschappenpaneel ertussen schuift. */}
+        <Show when={panelSide() === 'right'}><LeftPanel /></Show>
       </div>
+
+      <Show when={scheduleDocked()}><SchedulePanel /></Show>
 
       <StatusBar />
 
@@ -137,7 +144,7 @@ function DesktopApp() {
       <PaletteContextMenu />
       <SymbolSettingsDialog />
       <SymbolTypeEditor />
-      <SchedulePanel />
+      <Show when={!scheduleDocked()}><SchedulePanel /></Show>
       <AssistantPanel />
       {/* MiniLog floating engine-log overlay removed per user request. */}
       <LoadingOverlay />

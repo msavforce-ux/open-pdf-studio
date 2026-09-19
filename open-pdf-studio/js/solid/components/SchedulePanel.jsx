@@ -10,6 +10,7 @@ import {
   scheduleVisible, setScheduleVisible,
   scheduleResult, grandTotals, appearance,
   setPropertiesVisible,
+  scheduleDocked, setScheduleDocked,
 } from '../stores/quantitiesStore.js';
 import QuantitiesProperties from './QuantitiesProperties.jsx';
 
@@ -31,6 +32,7 @@ export default function SchedulePanel() {
   let dragOffsetY = 0;
 
   function onHeaderMouseDown(e) {
+    if (scheduleDocked()) return;  // gedockt valt er niets te slepen
     if (e.target.closest('.modal-close-btn') || e.target.closest('.schedule-header-btn')) return;
     isDragging = true;
     const rect = dialogRef.getBoundingClientRect();
@@ -118,7 +120,9 @@ export default function SchedulePanel() {
 
   return (
     <Show when={scheduleVisible()}>
-      <div ref={dialogRef} class="modal-dialog schedule-modeless" role="dialog" aria-label={t('quantities.title')}>
+      <div ref={dialogRef}
+        class={scheduleDocked() ? 'schedule-gedockt' : 'modal-dialog schedule-modeless'}
+        role="dialog" aria-label={t('quantities.title')}>
         {/* Header */}
         <div class="modal-header" onMouseDown={onHeaderMouseDown}>
           <h2>{t('quantities.title')}</h2>
@@ -126,6 +130,11 @@ export default function SchedulePanel() {
             <button class="schedule-header-btn" title={t('quantities.properties')} onClick={() => setPropertiesVisible(true)}>⚙ {t('quantities.properties')}</button>
             <button class="schedule-header-btn" title={t('quantities.placeOnPdf')} onClick={placeOnPdf}>PDF</button>
             <button class="schedule-header-btn" title={t('quantities.exportCsv')} onClick={exportCSV}>CSV</button>
+            <button class="schedule-header-btn"
+              title={scheduleDocked() ? (t('quantities.undock') || 'Float') : (t('quantities.dock') || 'Dock')}
+              onClick={() => setScheduleDocked(!scheduleDocked())}>
+              {scheduleDocked() ? '\u2197' : '\u2913'}
+            </button>
             <button class="modal-close-btn" title={t('quantities.close')} onClick={() => setScheduleVisible(false)}>
               <svg width="10" height="10" viewBox="0 0 10 10"><line x1="0" y1="0" x2="10" y2="10" stroke="currentColor" stroke-width="1.2" /><line x1="10" y1="0" x2="0" y2="10" stroke="currentColor" stroke-width="1.2" /></svg>
             </button>
