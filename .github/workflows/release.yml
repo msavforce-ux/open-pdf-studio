@@ -80,7 +80,7 @@ jobs:
             args: ''
             target: 'linux'
           - platform: 'macos-26'
-            args: '--target universal-apple-darwin'
+            args: ${{ format('--target universal-apple-darwin {0}', env.UPDATER_SLEUTEL != 'true' && env.GEEN_UPDATER_ARG || '') }}
             target: 'macos'
           - platform: 'windows-latest'
             args: ''
@@ -340,7 +340,7 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         with:
           projectPath: open-pdf-studio
-          args: ${{ (matrix.target == 'windows-system' && env.ONDERTEKENEN_WIN == 'true') && '--config src-tauri/tauri.signing.conf.json' || (env.UPDATER_SLEUTEL == 'true' && matrix.args || format('{0} {1}', matrix.args, env.GEEN_UPDATER_ARG)) }}
+          args: ${{ (matrix.target == 'windows-system' && env.ONDERTEKENEN_WIN == 'true') && '--config src-tauri/tauri.signing.conf.json' || format('{0} {1}', matrix.args, env.UPDATER_SLEUTEL != 'true' && env.GEEN_UPDATER_ARG || '') }}
           releaseId: ${{ needs.create-release.outputs.release_id }}
           includeUpdaterJson: ${{ env.UPDATER_SLEUTEL == 'true' }}
 
@@ -409,7 +409,7 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         with:
           projectPath: open-pdf-studio
-          args: ${{ env.ONDERTEKENEN_WIN == 'true' && '--config src-tauri/tauri.signing.conf.json' || (env.UPDATER_SLEUTEL == 'true' && '' || env.GEEN_UPDATER_ARG) }}
+          args: ${{ env.ONDERTEKENEN_WIN == 'true' && '--config src-tauri/tauri.signing.conf.json' || (env.UPDATER_SLEUTEL != 'true' && env.GEEN_UPDATER_ARG || '') }}
 
       # Proof on what users actually get: install the signed installer silently
       # on the runner and check the signatures of the installed binaries,
