@@ -525,5 +525,15 @@
     "measureArea": "Area",
     "measurePerimeter": "Perimeter",
     "annotation": "Annotation"
+  },
+  "toolchest": {
+    "title": "Tool chest",
+    "save": "Save tool",
+    "remove": "Remove tool",
+    "namePlaceholder": "Name, e.g. SM-01 Walls",
+    "length": "Length",
+    "area": "Area",
+    "perimeter": "Perimeter",
+    "count": "Count"
   }
 }

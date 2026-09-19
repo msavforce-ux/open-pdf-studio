@@ -19,6 +19,31 @@ import { betonbalkLastProfiel } from '../solid/stores/betonbalkStore.js';
 import { labelFontSizeAt } from '../annotations/drafting-rules.js';
 
 /**
+ * Een gereedschap uit de gereedschapskist zet zijn naam en uiterlijk in
+ * `state.toolOverrides` onder `preset*`-sleutels (eigen voorvoegsel, zodat ze
+ * niet botsen met de stempel- en wandsleutels die daar al staan).
+ *
+ * Meetgereedschappen lazen tot nu toe uitsluitend de voorkeuren. Een opgeslagen
+ * gereedschap verloor daardoor precies wat het bruikbaar maakt: zijn kleur, en
+ * vooral zijn naam — en juist op die naam groepeert de hoeveelhedenstaat de
+ * kiekiai. Zonder dit blijft "gereedschap kiezen en meten" twee losse stappen.
+ */
+function applyToolPreset(props) {
+  const o = state.toolOverrides || {};
+  if (o.presetLabel) {
+    props.label = o.presetLabel;
+    if (!props.subject) props.subject = o.presetLabel;
+  }
+  if (o.presetStrokeColor) {
+    props.color = o.presetStrokeColor;
+    props.strokeColor = o.presetStrokeColor;
+  }
+  if (o.presetLineWidth != null) props.lineWidth = o.presetLineWidth;
+  if (o.presetFillColor !== undefined) props.fillColor = o.presetFillColor;
+  return props;
+}
+
+/**
  * Build raw annotation properties from tool + coordinates.
  * Shared by both preview rendering and final annotation creation.
  * Does NOT call createAnnotation() — returns a plain props object.
@@ -372,7 +397,7 @@ export function buildAnnotationProps(tool, startX, startY, endX, endY, e) {
       if (e?.ctrlKey) end = snapDistanceTo10(startX, startY, end.x, end.y);
       const currentPage = getActiveDocument()?.currentPage || 1;
       const dist = calculateDistance(startX, startY, end.x, end.y, currentPage);
-      return {
+      return applyToolPreset({
         type: 'measureDistance',
         page: currentPage,
         startX, startY,
@@ -386,7 +411,7 @@ export function buildAnnotationProps(tool, startX, startY, endX, endY, e) {
         measureValue: dist.value,
         measureUnit: dist.unit,
         measurePixels: dist.pixels
-      };
+      });
     }
 
     case 'parametricSymbol': {
@@ -526,7 +551,7 @@ export function buildAnnotationProps(tool, startX, startY, endX, endY, e) {
     case 'count': {
       const cat = _activeCountCategory();
       const n = _nextCountNumber(cat?.id);
-      return {
+      return applyToolPreset({
         type: 'count',
         page: getActiveDocument()?.currentPage || 1,
         x: startX, y: startY,
@@ -537,7 +562,7 @@ export function buildAnnotationProps(tool, startX, startY, endX, endY, e) {
         color: cat?.color || '#e11d48',
         strokeColor: cat?.color || '#e11d48',
         opacity: 1,
-      };
+      });
     }
 
     case 'viewport': {
@@ -629,7 +654,7 @@ export function createMeasureAreaAnnotation(points, holes) {
     annProps.measurePrecision = mPrefs.measureAreaDimPrecision;
   }
   applyDynamicScaling(annProps, currentPage, points[0]?.x || 0, points[0]?.y || 0);
-  return createAnnotation(annProps);
+  return createAnnotation(applyToolPreset(annProps));
 }
 
 export function createMeasurePerimeterAnnotation(points) {
@@ -669,5 +694,5 @@ export function createMeasurePerimeterAnnotation(points) {
     perimProps.measureUnit = perim.unit;
   }
   applyDynamicScaling(perimProps, currentPage, points[0]?.x || 0, points[0]?.y || 0);
-  return createAnnotation(perimProps);
+  return createAnnotation(applyToolPreset(perimProps));
 }

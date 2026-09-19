@@ -2,6 +2,10 @@ import { Show, For, createSignal, createEffect, createMemo } from 'solid-js';
 import { state } from '../../core/state.js';
 import { setTool } from '../../tools/manager.js';
 import {
+  getToolPresets, addToolPreset, removeToolPreset,
+  naarToolOverrides, PRESET_TOOLS,
+} from '../../symbols/tool-presets-store.js';
+import {
   searchQuery, setSearchQuery,
   filteredCategories, allCategories,
   toggleCategory, isCategoryExpanded,
@@ -193,6 +197,26 @@ const arrowSvg = `<svg viewBox="0 0 10 10" width="10" height="10"><path d="M3 1l
 // --- Inner content (shared between docked and floating) ---
 function SymbolContent() {
   const { t } = useTranslation('ribbon');
+  const [presets, setPresets] = createSignal(getToolPresets());
+  const [kistOpen, setKistOpen] = createSignal(true);
+  const [nieuwNaam, setNieuwNaam] = createSignal('');
+  const [nieuwTool, setNieuwTool] = createSignal(PRESET_TOOLS[0]);
+  const [nieuwKleur, setNieuwKleur] = createSignal('#e11d48');
+
+  const gereedschapNaam = (tool) => ({
+    measureDistance: t('toolchest.length') || 'Length',
+    measureArea: t('toolchest.area') || 'Area',
+    measurePerimeter: t('toolchest.perimeter') || 'Perimeter',
+    count: t('toolchest.count') || 'Count',
+  })[tool] || tool;
+
+  // Zet het gereedschap klaar MET zijn naam en uiterlijk: annotation-creators
+  // leest deze preset*-sleutels bij het maken van de meting.
+  const kiesGereedschap = (p) => {
+    state.toolOverrides = naarToolOverrides(p);
+    setTool(p.tool);
+  };
+
   return (
     <>
       {/* Search */}
@@ -229,6 +253,70 @@ function SymbolContent() {
           title={t('drawing.symbolScaleCustom')}
           onChange={(e) => setSymboolSchaal(e.target.value)}
         />
+      </div>
+
+      {/* Gereedschapskist — opgeslagen meetgereedschappen. Kiezen zet het
+          meetgereedschap klaar MET zijn naam, en op die naam groepeert de
+          hoeveelhedenstaat de kiekiai over alle bladen heen. */}
+      <div class="sp-toolchest">
+        <div class="sp-cat-header" onClick={() => setKistOpen(!kistOpen())}>
+          <div class={`sp-cat-arrow${kistOpen() ? ' expanded' : ''}`} innerHTML={arrowSvg} />
+          <span class="sp-cat-name">{t('toolchest.title') || 'Tool chest'}</span>
+          <span class="sp-cat-count">{presets().length}</span>
+        </div>
+        <Show when={kistOpen()}>
+          <div style="padding:4px 6px;">
+            <For each={presets()}>
+              {(p) => (
+                <div style="display:flex; align-items:center; gap:6px; padding:3px 2px;">
+                  <button
+                    style="flex:1; display:flex; align-items:center; gap:6px; text-align:left; background:none; border:none; cursor:pointer; padding:2px 4px;"
+                    title={`${p.naam} — ${p.tool}`}
+                    onClick={() => kiesGereedschap(p)}
+                  >
+                    <span style={`width:11px; height:11px; flex:none; border:1px solid #555; background:${p.strokeColor || '#888'};`}></span>
+                    <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{p.naam}</span>
+                    <span style="color:#888; font-size:10px;">{gereedschapNaam(p.tool)}</span>
+                  </button>
+                  <button
+                    class="sp-settings-btn"
+                    title={t('toolchest.remove') || 'Remove'}
+                    onClick={() => { removeToolPreset(p.id); setPresets(getToolPresets()); }}
+                  >×</button>
+                </div>
+              )}
+            </For>
+            {/* Twee regels: het palet is smal, en op één regel bleef van het
+                naamveld een paar tekens over — juist het veld dat ertoe doet. */}
+            <div style="margin-top:5px;">
+              <input
+                style="width:100%; box-sizing:border-box; font:inherit; padding:2px 4px;"
+                placeholder={t('toolchest.namePlaceholder') || 'Name, e.g. SM-01 Walls'}
+                value={nieuwNaam()}
+                onInput={(e) => setNieuwNaam(e.currentTarget.value)}
+              />
+            </div>
+            <div style="display:flex; gap:4px; align-items:center; margin-top:4px;">
+              <select style="flex:1; min-width:0; font:inherit;" value={nieuwTool()} onChange={(e) => setNieuwTool(e.currentTarget.value)}>
+                <For each={PRESET_TOOLS}>{(tool) => <option value={tool}>{gereedschapNaam(tool)}</option>}</For>
+              </select>
+              <input type="color" style="width:26px; flex:none; padding:0;" value={nieuwKleur()} onInput={(e) => setNieuwKleur(e.currentTarget.value)} />
+              <button
+                class="sp-settings-btn"
+                title={t('toolchest.save') || 'Save tool'}
+                disabled={!nieuwNaam().trim()}
+                onClick={() => {
+                  const p = addToolPreset({
+                    naam: nieuwNaam(), tool: nieuwTool(), strokeColor: nieuwKleur(),
+                  });
+                  if (!p) return;
+                  setPresets(getToolPresets());
+                  setNieuwNaam('');
+                }}
+              >+</button>
+            </div>
+          </div>
+        </Show>
       </div>
 
       {/* Categories */}
