@@ -99,6 +99,12 @@ jobs:
       # secrets er wel, dan verandert er niets aan het officiële pad.
       ONDERTEKENEN_WIN: ${{ secrets.AZURE_CLIENT_ID != '' }}
       ONDERTEKENEN_MAC: ${{ secrets.APPLE_CERTIFICATE != '' }}
+      # De updater ondertekent zijn eigen artefacten met TAURI_SIGNING_PRIVATE_KEY.
+      # Ontbreekt die sleutel, dan bouwt de installer wel maar valt de stap erna
+      # om op "failed to decode secret key" — de bundel is dan al klaar en gaat
+      # alsnog verloren. Zonder sleutel maken we dus geen updater-artefacten.
+      UPDATER_SLEUTEL: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY != '' }}
+      GEEN_UPDATER_ARG: '--config {"bundle":{"createUpdaterArtifacts":false}}'
       # Do not bundle the display stack into the AppImage. Bundled Ubuntu-era
       # libwayland/xkbcommon/xcb shadow the host copies and abort WebKit with
       # "Could not create default EGL display: EGL_BAD_PARAMETER" on newer Mesa
@@ -334,9 +340,9 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         with:
           projectPath: open-pdf-studio
-          args: ${{ (matrix.target == 'windows-system' && env.ONDERTEKENEN_WIN == 'true') && '--config src-tauri/tauri.signing.conf.json' || matrix.args }}
+          args: ${{ (matrix.target == 'windows-system' && env.ONDERTEKENEN_WIN == 'true') && '--config src-tauri/tauri.signing.conf.json' || (env.UPDATER_SLEUTEL == 'true' && matrix.args || format('{0} {1}', matrix.args, env.GEEN_UPDATER_ARG)) }}
           releaseId: ${{ needs.create-release.outputs.release_id }}
-          includeUpdaterJson: true
+          includeUpdaterJson: ${{ env.UPDATER_SLEUTEL == 'true' }}
 
       # Compile once. Bundling is a separate phase so a temporary failure in
       # the external notarization service can be retried without rebuilding
@@ -364,9 +370,9 @@ jobs:
         with:
           projectPath: open-pdf-studio
           tauriScript: node scripts/macos-notarization-retry.mjs
-          args: --target universal-apple-darwin
+          args: ${{ env.UPDATER_SLEUTEL == 'true' && '--target universal-apple-darwin' || format('--target universal-apple-darwin {0}', env.GEEN_UPDATER_ARG) }}
           releaseId: ${{ needs.create-release.outputs.release_id }}
-          includeUpdaterJson: true
+          includeUpdaterJson: ${{ env.UPDATER_SLEUTEL == 'true' }}
 
       - name: Verify macOS signature and notarization
         if: matrix.target == 'macos'
@@ -403,7 +409,7 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         with:
           projectPath: open-pdf-studio
-          args: ${{ env.ONDERTEKENEN_WIN == 'true' && '--config src-tauri/tauri.signing.conf.json' || '' }}
+          args: ${{ env.ONDERTEKENEN_WIN == 'true' && '--config src-tauri/tauri.signing.conf.json' || (env.UPDATER_SLEUTEL == 'true' && '' || env.GEEN_UPDATER_ARG) }}
 
       # Proof on what users actually get: install the signed installer silently
       # on the runner and check the signatures of the installed binaries,
