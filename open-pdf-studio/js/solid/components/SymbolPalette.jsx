@@ -2,7 +2,7 @@ import { Show, For, createSignal, createEffect, createMemo } from 'solid-js';
 import { state } from '../../core/state.js';
 import { setTool } from '../../tools/manager.js';
 import {
-  getToolPresets, addToolPreset, removeToolPreset,
+  getToolPresets, addToolPreset, removeToolPreset, updateToolPreset,
   naarToolOverrides, PRESET_TOOLS,
 } from '../../symbols/tool-presets-store.js';
 import {
@@ -202,6 +202,10 @@ function SymbolContent() {
   const [nieuwNaam, setNieuwNaam] = createSignal('');
   const [nieuwTool, setNieuwTool] = createSignal(PRESET_TOOLS[0]);
   const [nieuwKleur, setNieuwKleur] = createSignal('#e11d48');
+  const [nieuwDikte, setNieuwDikte] = createSignal(2);
+  // Welk gereedschap staat open om te wijzigen? Eén tegelijk: het palet is
+  // smal, en twee open formulieren naast elkaar zijn niet te lezen.
+  const [bewerktId, setBewerktId] = createSignal(null);
 
   const gereedschapNaam = (tool) => ({
     measureDistance: t('toolchest.length') || 'Length',
@@ -268,22 +272,71 @@ function SymbolContent() {
           <div style="padding:4px 6px;">
             <For each={presets()}>
               {(p) => (
-                <div style="display:flex; align-items:center; gap:6px; padding:3px 2px;">
-                  <button
-                    style="flex:1; display:flex; align-items:center; gap:6px; text-align:left; background:none; border:none; cursor:pointer; padding:2px 4px;"
-                    title={`${p.naam} — ${p.tool}`}
-                    onClick={() => kiesGereedschap(p)}
-                  >
-                    <span style={`width:11px; height:11px; flex:none; border:1px solid #555; background:${p.strokeColor || '#888'};`}></span>
-                    <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{p.naam}</span>
-                    <span style="color:#888; font-size:10px;">{gereedschapNaam(p.tool)}</span>
-                  </button>
-                  <button
-                    class="sp-settings-btn"
-                    title={t('toolchest.remove') || 'Remove'}
-                    onClick={() => { removeToolPreset(p.id); setPresets(getToolPresets()); }}
-                  >×</button>
-                </div>
+                <>
+                  <div style="display:flex; align-items:center; gap:4px; padding:3px 2px;">
+                    <button
+                      style="flex:1; min-width:0; display:flex; align-items:center; gap:6px; text-align:left; background:none; border:none; cursor:pointer; padding:2px 4px;"
+                      title={`${p.naam} — ${gereedschapNaam(p.tool)}`}
+                      onClick={() => kiesGereedschap(p)}
+                    >
+                      <span style={`width:11px; height:11px; flex:none; border:1px solid #555; background:${p.strokeColor || '#888'};`}></span>
+                      <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{p.naam}</span>
+                      <span style="color:#888; font-size:10px;">{gereedschapNaam(p.tool)}</span>
+                    </button>
+                    {/* Wijzigen i.p.v. weggooien-en-opnieuw: het id blijft, dus
+                        de koppeling met wat je al gemeten hebt blijft heel. */}
+                    <button
+                      class="sp-settings-btn"
+                      title={t('toolchest.edit') || 'Edit tool'}
+                      onClick={() => setBewerktId(bewerktId() === p.id ? null : p.id)}
+                    >✎</button>
+                    <button
+                      class="sp-settings-btn"
+                      title={t('toolchest.remove') || 'Remove'}
+                      onClick={() => { removeToolPreset(p.id); setPresets(getToolPresets()); }}
+                    >×</button>
+                  </div>
+
+                  <Show when={bewerktId() === p.id}>
+                    <div style="padding:2px 2px 6px 2px; border-bottom:1px solid #3a3a3a; margin-bottom:4px;">
+                      <input
+                        style="width:100%; box-sizing:border-box; font:inherit; padding:2px 4px;"
+                        value={p.naam}
+                        title={t('toolchest.namePlaceholder') || 'Name'}
+                        onChange={(e) => {
+                          updateToolPreset(p.id, { naam: e.currentTarget.value });
+                          setPresets(getToolPresets());
+                        }}
+                      />
+                      <div style="display:flex; gap:4px; align-items:center; margin-top:4px;">
+                        <select
+                          style="flex:1; min-width:0; font:inherit;"
+                          value={p.tool}
+                          onChange={(e) => { updateToolPreset(p.id, { tool: e.currentTarget.value }); setPresets(getToolPresets()); }}
+                        >
+                          <For each={PRESET_TOOLS}>{(tool) => <option value={tool}>{gereedschapNaam(tool)}</option>}</For>
+                        </select>
+                        <input
+                          type="color" style="width:26px; flex:none; padding:0;"
+                          value={p.strokeColor || '#888888'}
+                          title={t('toolchest.color') || 'Colour'}
+                          onInput={(e) => { updateToolPreset(p.id, { strokeColor: e.currentTarget.value }); setPresets(getToolPresets()); }}
+                        />
+                        <input
+                          type="number" min="0.5" max="12" step="0.5"
+                          style="width:46px; flex:none; font:inherit;"
+                          value={p.lineWidth ?? ''}
+                          title={t('toolchest.lineWidth') || 'Line width'}
+                          onChange={(e) => {
+                            const v = e.currentTarget.value === '' ? null : Number(e.currentTarget.value);
+                            updateToolPreset(p.id, { lineWidth: v });
+                            setPresets(getToolPresets());
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </Show>
+                </>
               )}
             </For>
             {/* Twee regels: het palet is smal, en op één regel bleef van het
@@ -301,6 +354,9 @@ function SymbolContent() {
                 <For each={PRESET_TOOLS}>{(tool) => <option value={tool}>{gereedschapNaam(tool)}</option>}</For>
               </select>
               <input type="color" style="width:26px; flex:none; padding:0;" value={nieuwKleur()} onInput={(e) => setNieuwKleur(e.currentTarget.value)} />
+              <input type="number" min="0.5" max="12" step="0.5" style="width:46px; flex:none; font:inherit;"
+                title={t('toolchest.lineWidth') || 'Line width'}
+                value={nieuwDikte()} onInput={(e) => setNieuwDikte(Number(e.currentTarget.value))} />
               <button
                 class="sp-settings-btn"
                 title={t('toolchest.save') || 'Save tool'}
@@ -308,6 +364,7 @@ function SymbolContent() {
                 onClick={() => {
                   const p = addToolPreset({
                     naam: nieuwNaam(), tool: nieuwTool(), strokeColor: nieuwKleur(),
+                    lineWidth: nieuwDikte(),
                   });
                   if (!p) return;
                   setPresets(getToolPresets());

@@ -62,3 +62,56 @@ export function naarToolOverrides(preset) {
   if (preset.fillColor !== undefined) o.presetFillColor = preset.fillColor;
   return o;
 }
+
+/**
+ * Wijzig een bewaard gereedschap op zijn plek.
+ *
+ * Zonder dit was de kist eenrichtingsverkeer: een tikfout in de naam of een
+ * kleur die op dit blad niet leesbaar is, betekende verwijderen en opnieuw
+ * maken — en dan raakt de koppeling met wat je al gemeten hebt zoek. Het id
+ * blijft daarom staan, ook als de naam verandert.
+ *
+ * Alleen meegegeven velden veranderen. `lineWidth: null` of `strokeColor: ''`
+ * wist het veld; weglaten laat het staan.
+ */
+export function bewerk(lijst, id, velden = {}) {
+  const bestaande = Array.isArray(lijst) ? lijst : [];
+  const index = bestaande.findIndex((p) => p.id === id);
+  if (index < 0) return [...bestaande];
+
+  const oud = bestaande[index];
+  const nieuw = { ...oud };
+
+  if (velden.naam !== undefined) {
+    const schoon = String(velden.naam).trim();
+    if (!schoon) return [...bestaande];   // naamloos gereedschap bestaat niet
+    nieuw.naam = schoon;
+  }
+  if (velden.tool !== undefined) {
+    if (!PRESET_TOOLS.includes(velden.tool)) return [...bestaande];
+    nieuw.tool = velden.tool;
+  }
+  if (velden.strokeColor !== undefined) {
+    if (velden.strokeColor) nieuw.strokeColor = String(velden.strokeColor);
+    else delete nieuw.strokeColor;
+  }
+  if (velden.lineWidth !== undefined) {
+    if (Number.isFinite(velden.lineWidth) && velden.lineWidth > 0) nieuw.lineWidth = velden.lineWidth;
+    else delete nieuw.lineWidth;
+  }
+  if (velden.fillColor !== undefined) {
+    if (velden.fillColor === null) delete nieuw.fillColor;
+    else nieuw.fillColor = velden.fillColor;
+  }
+
+  // Botst de nieuwe naam met een ánder gereedschap van dezelfde soort, dan
+  // zouden er twee regels met dezelfde naam in de staat komen. Dat is precies
+  // wat voegToe() voorkomt, dus hier ook: de wijziging gaat niet door.
+  const botst = bestaande.some((p, i) =>
+    i !== index && p.tool === nieuw.tool && p.naam.toLowerCase() === nieuw.naam.toLowerCase());
+  if (botst) return [...bestaande];
+
+  const kopie = [...bestaande];
+  kopie[index] = nieuw;
+  return kopie;
+}

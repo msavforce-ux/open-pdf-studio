@@ -6,7 +6,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { maakPreset, voegToe, verwijder, naarToolOverrides, PRESET_TOOLS } from './tool-presets.js';
+import { maakPreset, voegToe, verwijder, bewerk, naarToolOverrides, PRESET_TOOLS } from './tool-presets.js';
 
 test('een gereedschap heeft een naam en een meetgereedschap nodig', () => {
   assert.equal(maakPreset({ naam: '', tool: 'measureArea' }), null);
@@ -71,4 +71,52 @@ test('naar toolOverrides: de naam gaat altijd mee, de rest alleen als ze er is',
   assert.deepEqual(vol, { presetLabel: 'GR-01', presetStrokeColor: '#2f7fd1', presetLineWidth: 2.5 });
 
   assert.deepEqual(naarToolOverrides(null), {});
+});
+
+test('een bewaard gereedschap is te wijzigen zonder zijn id te verliezen', () => {
+  const a = maakPreset({ naam: 'SM-01', tool: 'measureDistance', strokeColor: '#000000', lineWidth: 2 });
+  const lijst = voegToe([], a);
+
+  const hernoemd = bewerk(lijst, a.id, { naam: '  SM-01 Pertvaros  ' });
+  assert.equal(hernoemd[0].naam, 'SM-01 Pertvaros');
+  assert.equal(hernoemd[0].id, a.id, 'het id blijft, anders raakt de koppeling zoek');
+  assert.equal(hernoemd[0].strokeColor, '#000000', 'de rest blijft staan');
+
+  const gekleurd = bewerk(hernoemd, a.id, { strokeColor: '#e11d48', lineWidth: 4 });
+  assert.equal(gekleurd[0].strokeColor, '#e11d48');
+  assert.equal(gekleurd[0].lineWidth, 4);
+  assert.equal(gekleurd[0].naam, 'SM-01 Pertvaros', 'de naam blijft');
+});
+
+test('wissen kan, maar een naam wegpoetsen niet', () => {
+  const a = maakPreset({ naam: 'GR-01', tool: 'measureArea', strokeColor: '#111111', lineWidth: 3 });
+  let lijst = voegToe([], a);
+
+  lijst = bewerk(lijst, a.id, { lineWidth: null, strokeColor: '' });
+  assert.equal(lijst[0].lineWidth, undefined);
+  assert.equal(lijst[0].strokeColor, undefined);
+
+  lijst = bewerk(lijst, a.id, { naam: '   ' });
+  assert.equal(lijst[0].naam, 'GR-01', 'een lege naam verandert niets');
+});
+
+test('hernoemen naar een naam die al bestaat gaat niet door', () => {
+  const a = maakPreset({ naam: 'SM-01', tool: 'measureDistance' });
+  const b = maakPreset({ naam: 'SM-02', tool: 'measureDistance' });
+  const lijst = voegToe(voegToe([], a), b);
+
+  const na = bewerk(lijst, b.id, { naam: 'sm-01' });
+  assert.deepEqual(na.map((p) => p.naam), ['SM-01', 'SM-02'], 'twee regels met dezelfde naam mag niet');
+
+  // Een ander gereedschap met die naam mag wel: lengte en aantal zijn
+  // verschillende posten.
+  const c = maakPreset({ naam: 'X', tool: 'count' });
+  const lijst2 = voegToe(lijst, c);
+  assert.equal(bewerk(lijst2, c.id, { naam: 'SM-01' })[2].naam, 'SM-01');
+});
+
+test('een onbekend id verandert niets', () => {
+  const a = maakPreset({ naam: 'A', tool: 'count' });
+  const lijst = voegToe([], a);
+  assert.deepEqual(bewerk(lijst, 'bestaat-niet', { naam: 'B' }), lijst);
 });

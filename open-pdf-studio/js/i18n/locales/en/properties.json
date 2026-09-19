@@ -606,7 +606,8 @@
       "builtinText": "Text"
     },
     "dock": "Dock at the bottom",
-    "undock": "Float"
+    "undock": "Float",
+    "renameGroup": "Rename — applies to every measurement in this group"
   },
   "parametricSymbol": {
     "defaultTitle": "Parametric symbol",

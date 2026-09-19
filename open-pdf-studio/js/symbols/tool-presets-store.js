@@ -6,9 +6,9 @@
 
 import { state } from '../core/state.js';
 import { savePreferences } from '../core/preferences.js';
-import { maakPreset, voegToe, verwijder } from './tool-presets.js';
+import { maakPreset, voegToe, verwijder, bewerk } from './tool-presets.js';
 
-export { maakPreset, voegToe, verwijder, naarToolOverrides, PRESET_TOOLS } from './tool-presets.js';
+export { maakPreset, voegToe, verwijder, bewerk, naarToolOverrides, PRESET_TOOLS } from './tool-presets.js';
 
 export function getToolPresets() {
   return state.preferences?.customToolPresets || [];
@@ -25,6 +25,12 @@ export function addToolPreset(velden) {
   if (!preset) return null;
   bewaar(voegToe(getToolPresets(), preset));
   return preset;
+}
+
+/** Wijzig naam, kleur of lijndikte van een bewaard gereedschap. */
+export function updateToolPreset(id, velden) {
+  bewaar(bewerk(getToolPresets(), id, velden));
+  return getToolPresets().find((p) => p.id === id) || null;
 }
 
 export function removeToolPreset(id) {

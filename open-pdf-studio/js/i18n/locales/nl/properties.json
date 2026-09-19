@@ -606,7 +606,8 @@
       "builtinText": "Tekst"
     },
     "dock": "Onderin vastzetten",
-    "undock": "Los venster"
+    "undock": "Los venster",
+    "renameGroup": "Hernoemen — geldt voor elke meting in deze groep"
   },
   "parametricSymbol": {
     "defaultTitle": "Parametric symbol",

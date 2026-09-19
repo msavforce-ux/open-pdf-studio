@@ -11,8 +11,10 @@ import {
   scheduleResult, grandTotals, appearance,
   setPropertiesVisible,
   scheduleDocked, setScheduleDocked,
+  sortLevels,
 } from '../stores/quantitiesStore.js';
 import QuantitiesProperties from './QuantitiesProperties.jsx';
+import { hernoemMetingen, elementenVanGroep } from '../../annotations/groep-hernoemen.js';
 
 function formatCell(val, col) {
   if (val == null || val === '') return '';
@@ -94,6 +96,25 @@ export default function SchedulePanel() {
     await writeBinaryFile(path, bytes);
   }
 
+  // Groepeert de staat op de NAAM, dan is de groepskop de plek om te
+  // hernoemen: één keer typen in plaats van elke meting apart in het
+  // eigenschappenpaneel. Bij groeperen op categorie of type slaat hernoemen
+  // nergens op — dan blijft het gewoon tekst.
+  const groepeertOpNaam = () => {
+    const g = (sortLevels() || []).find((x) => x && x.group);
+    return Boolean(g) && g.field === 'label';
+  };
+
+  /** Hernoem elke meting in de groep in één keer. */
+  function hernoemGroep(group, nieuweNaam) {
+    if (!hernoemMetingen(elementenVanGroep(group), nieuweNaam)) return;
+    import('../../annotations/rendering.js').then((m) => {
+      const doc = getActiveDocument();
+      if (doc?.viewMode === 'continuous') m.redrawContinuous?.();
+      else m.redrawAnnotations?.();
+    });
+  }
+
   function placeOnPdf() {
     const doc = getActiveDocument();
     if (!doc) return;
@@ -164,7 +185,18 @@ export default function SchedulePanel() {
                     <tbody>
                       <Show when={group.key !== null}>
                         <tr class="q-group-row">
-                          <td colspan={scheduleResult().columns.length}>{group.key} <span class="schedule-group-count">({group.rows.length})</span></td>
+                          <td colspan={scheduleResult().columns.length}>
+                            <Show when={groepeertOpNaam()} fallback={<>{group.key}</>}>
+                              <input
+                                class="q-groep-naam"
+                                value={group.key}
+                                title={t('quantities.renameGroup') || 'Rename — applies to every measurement in this group'}
+                                onChange={(e) => hernoemGroep(group, e.currentTarget.value)}
+                                onKeyDown={(e) => { if (e.key === 'Enter') e.currentTarget.blur(); }}
+                              />
+                            </Show>
+                            <span class="schedule-group-count">({group.rows.length})</span>
+                          </td>
                         </tr>
                       </Show>
                       <Show when={scheduleResult().itemize}>

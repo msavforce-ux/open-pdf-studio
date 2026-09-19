@@ -534,6 +534,9 @@
     "length": "Length",
     "area": "Area",
     "perimeter": "Perimeter",
-    "count": "Count"
+    "count": "Count",
+    "edit": "Edit tool",
+    "color": "Colour",
+    "lineWidth": "Line width"
   }
 }
