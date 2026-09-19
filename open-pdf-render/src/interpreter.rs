@@ -3032,6 +3032,9 @@ impl Interpreter {
                         // space tuple before the existing RGBA conversion.
                         let comp_slice: &[u8] = if let Some(pal) = palette.as_ref() {
                             let pi = raw_pixels.get(i).copied().unwrap_or(0) as usize;
+                            // pal_buf is vier bytes; een kleurruimte die meer
+                            // componenten opgeeft mag er niet buiten schrijven.
+                            let pal_chunk = pal_chunk.min(pal_buf.len());
                             let p_off = pi * pal_chunk;
                             if p_off + pal_chunk <= pal.len() {
                                 for j in 0..pal_chunk { pal_buf[j] = pal[p_off + j]; }
@@ -3041,12 +3044,27 @@ impl Interpreter {
                             i += stream_components as usize;
                             &pal_buf[..pal_chunk]
                         } else {
-                            let s = &raw_pixels[i .. i + stream_components as usize];
-                            i += stream_components as usize;
+                            // De stroom kan korter zijn dan width*height*n
+                            // belooft; dan is er voor dit pixel niets meer.
+                            let einde = i + stream_components as usize;
+                            if einde > raw_pixels.len() { break; }
+                            let s = &raw_pixels[i .. einde];
+                            i = einde;
                             s
                         };
 
-                        match components {
+                        // Wat de kleurruimte BELOOFT en wat er in de stroom
+                        // STAAT lopen in de praktijk uiteen: een Indexed-beeld
+                        // waarvan het palet niet te lezen was levert één byte
+                        // per pixel terwijl de basiskleurruimte er drie zegt.
+                        // Blind comp_slice[1] lezen liet de hele applicatie
+                        // omvallen op een constructietekening — een
+                        // onleesbaar plaatje mag hooguit een lelijk plaatje
+                        // opleveren, nooit een crash. Daarom telt hier het
+                        // aantal bytes dat er echt is.
+                        let aanwezig = comp_slice.len().min(components as usize);
+
+                        match aanwezig {
                             1 => {
                                 let g = comp_slice[0];
                                 let g2 = pm(g, alpha);
