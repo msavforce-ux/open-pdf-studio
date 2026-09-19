@@ -97,5 +97,8 @@
       "doneAll": "{{count}} woorden herkend op {{pages}} pagina's",
       "failed": "Tekstherkenning mislukt"
     }
+  },
+  "compare": {
+    "splitLabel": "Gesplitste weergave"
   }
 }

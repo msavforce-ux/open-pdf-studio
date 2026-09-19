@@ -97,5 +97,8 @@
       "doneAll": "Recognized {{count}} words across {{pages}} pages",
       "failed": "Text recognition failed"
     }
+  },
+  "compare": {
+    "splitLabel": "Split view"
   }
 }

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { isCode, bouwIndex, codeOnder } from './verwijzing-index.js';
+import { isCode, normaliseerCode, bouwIndex, codeOnder } from './verwijzing-index.js';
 
 const T = (str, x = 0, y = 0) => ({ str, x, y });
 
@@ -23,7 +23,7 @@ test('de staat wint als definitie, niet de plattegrond', () => {
     { page: 73, groot: false, items: [T('L-1'), T('L-2'), T('L-3'), T('BS-1'), T('BS-2')] },
   ]);
 
-  const l1 = index.get('L-1');
+  const l1 = index.get('L1');
   assert.ok(l1, 'L-1 moet in de index staan');
   assert.deepEqual(l1.bladen, [60, 61, 73]);
   assert.equal(l1.definitie, 73, 'de staat beschrijft de code, de plattegrond gebruikt hem');
@@ -36,9 +36,9 @@ test('stempeltekst verwijst nergens heen', () => {
   }));
   bladen.push({ page: 9, groot: false, items: [T('L-1'), T('L-2'), T('L-3')] });
   const index = bouwIndex(bladen);
-  assert.equal(index.has('KV-1'), false, 'op elk tekeningblad = stempel');
-  assert.ok(index.has('L-1'), 'een echte code staat maar op een deel');
-  assert.equal(index.get('L-1').definitie, 9);
+  assert.equal(index.has('KV1'), false, 'op elk tekeningblad = stempel');
+  assert.ok(index.has('L1'), 'een echte code staat maar op een deel');
+  assert.equal(index.get('L1').definitie, 9);
 });
 
 test('een code op maar één blad verwijst nergens heen', () => {
@@ -46,7 +46,7 @@ test('een code op maar één blad verwijst nergens heen', () => {
     { page: 60, groot: true, items: [T('XX-9'), T('XX-9')] },
     { page: 73, groot: false, items: [T('L-1'), T('L-2')] },
   ]);
-  assert.equal(index.has('XX-9'), false);
+  assert.equal(index.has('XX9'), false);
 });
 
 test('liever geen verwijzing dan een verkeerde', () => {
@@ -55,7 +55,7 @@ test('liever geen verwijzing dan een verkeerde', () => {
     { page: 60, groot: true, items: [T('L-1')] },
     { page: 61, groot: true, items: [T('L-1')] },
   ]);
-  assert.equal(index.get('L-1').definitie, null);
+  assert.equal(index.get('L1').definitie, null);
 });
 
 test('de code onder de aanwijzer', () => {
@@ -64,4 +64,49 @@ test('de code onder de aanwijzer', () => {
   assert.equal(codeOnder(items, 299, 203), 'BS-2');
   assert.equal(codeOnder(items, 200, 200), null, 'niets in de buurt');
   assert.equal(codeOnder(items, 102, 201), 'L-1', 'een maat is geen verwijzing');
+});
+
+test('T-1 en T1 zijn dezelfde code', () => {
+  assert.equal(normaliseerCode('T-1'), 'T1');
+  assert.equal(normaliseerCode(' t 1 '), 'T1');
+  assert.equal(normaliseerCode('BST-1'), 'BST1');
+  assert.notEqual(normaliseerCode('T-1'), normaliseerCode('T-2'));
+});
+
+test('twee schrijfwijzen vallen samen, en de vaakste wint als naam', () => {
+  // Zo staat het in de echte set: op de architectuurbladen met streepje,
+  // op de constructiebladen zonder.
+  const index = bouwIndex([
+    { page: 60, groot: true, items: [T('T-1'), T('T-1'), T('T-2'), T('T-3')] },
+    { page: 61, groot: true, items: [T('T-1')] },
+    { page: 105, groot: true, items: [T('T1')] },
+    { page: 130, groot: false, items: [T('T-1'), T('T-2'), T('T-3')] },
+  ]);
+
+  assert.equal(index.size, 3, 'T-1 en T1 tellen als één');
+  const t1 = index.get('T1');
+  assert.ok(t1, 'de sleutel is de genormaliseerde vorm');
+  assert.equal(t1.code, 'T-1', 'getoond wordt de vaakste schrijfwijze');
+  assert.deepEqual(t1.bladen, [60, 61, 105, 130]);
+  assert.equal(t1.definitie, 130);
+});
+
+test('de index zegt of het beschrijvende blad een staat is of een tekening', () => {
+  // Blad 9 is een staat (klein, codedicht) → echte beschrijving.
+  const metStaat = bouwIndex([
+    { page: 1, groot: true, items: [T('L-1')] },
+    { page: 9, groot: false, items: [T('L-1'), T('L-2'), T('L-3')] },
+  ]);
+  assert.equal(metStaat.get('L1').definitie, 9);
+  assert.equal(metStaat.get('L1').definitieIsStaat, true);
+
+  // Alleen grote tekeningbladen: het gevelblad draagt de codes wel, maar
+  // beschrijft ze niet.
+  const alleenTekening = bouwIndex([
+    { page: 56, groot: true, items: [T('L-1'), T('L-2'), T('L-3')] },
+    { page: 60, groot: true, items: [T('L-1')] },
+  ]);
+  assert.equal(alleenTekening.get('L1').definitie, 56);
+  assert.equal(alleenTekening.get('L1').definitieIsStaat, false,
+    'een tekening beschrijft niet — een ander projectdeel mag voorgaan');
 });

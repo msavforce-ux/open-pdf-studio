@@ -3,7 +3,7 @@ import { activeTab } from '../../../stores/leftPanelStore.js';
 import { getActiveDocument } from '../../../../core/state.js';
 import { useTranslation } from '../../../../i18n/useTranslation.js';
 import {
-  verwijzingen, bezig, gebouwdVoor, voortgang, fout, bouwVerwijzingen, openVerwijzing,
+  verwijzingen, bezig, gebouwdVoor, voortgang, fout, bouwVerwijzingen, openVerwijzing, elders,
 } from '../../../stores/verwijzingStore.js';
 
 export default function VerwijzingenPanel() {
@@ -22,6 +22,12 @@ export default function VerwijzingenPanel() {
   });
 
   const actueel = () => gebouwdVoor() === getActiveDocument()?.id;
+
+  /** Staat deze code ook in een ander geopend bestand? Dan is dát de detail. */
+  const ginds = (v) => {
+    const e = elders(v.sleutel || v.code)[0];
+    return e ? e.naam.replace(/^.*[\\/]/, '') : null;
+  };
 
   return (
     <div class="left-panel-content" classList={{ active: activeTab() === 'verwijzingen' }}>
@@ -61,13 +67,14 @@ export default function VerwijzingenPanel() {
                 </div>
                 <For each={codes}>
                   {(v) => (
-                    <div class="measurements-item"
-                      classList={{ 'is-naamloos': v.definitie == null }}
-                      onClick={() => v.definitie != null && openVerwijzing(v.code)}>
+                    <div class="measurements-item" data-code={v.sleutel || v.code}
+                      classList={{ 'is-naamloos': v.definitie == null && !ginds(v) }}
+                      onClick={() => openVerwijzing(v.sleutel || v.code)}>
                       <div class="measurements-item-info">
                         <div class="measurements-item-name">{v.code}</div>
                         <div class="measurements-item-detail">
                           {(t('verwijzingen.usedOn') || 'Used on') + ' ' + v.bladen.join(', ')}
+                          {ginds(v) ? ' \u2192 ' + ginds(v) : ''}
                         </div>
                       </div>
                     </div>

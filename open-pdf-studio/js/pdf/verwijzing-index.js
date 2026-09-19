@@ -24,6 +24,18 @@ export function isCode(str) {
 }
 
 /**
+ * De sleutel waaronder twee schrijfwijzen dezelfde code zijn.
+ *
+ * In de echte set staat op de architectuurbladen T-1, T-4, T-5 en op de
+ * constructiebladen T1, T4, T5 — hetzelfde element, alleen het streepje
+ * verschilt. Zonder deze normalisatie zijn dat zes codes in plaats van drie,
+ * en valt de verwijzing tussen de twee delen stil weg.
+ */
+export function normaliseerCode(str) {
+  return String(str == null ? '' : str).trim().toUpperCase().replace(/[-\s]/g, '');
+}
+
+/**
  * Bouw de index.
  *
  * @param {Array<{page:number, groot:boolean, items:Array<{str,x,y}>}>} bladen
@@ -33,12 +45,17 @@ export function isCode(str) {
 export function bouwIndex(bladen) {
   const perCode = new Map();
   const codesPerBlad = new Map();
+  const schrijfwijzen = new Map();
 
   for (const blad of bladen || []) {
     for (const it of blad.items || []) {
-      const code = String(it.str == null ? '' : it.str).trim();
-      if (!isCode(code)) continue;
+      const geschreven = String(it.str == null ? '' : it.str).trim();
+      if (!isCode(geschreven)) continue;
+      const code = normaliseerCode(geschreven);
       if (!perCode.has(code)) perCode.set(code, new Map());
+      if (!schrijfwijzen.has(code)) schrijfwijzen.set(code, new Map());
+      const sw = schrijfwijzen.get(code);
+      sw.set(geschreven, (sw.get(geschreven) || 0) + 1);
       const m = perCode.get(code);
       if (!m.has(blad.page)) m.set(blad.page, []);
       m.get(blad.page).push({ x: it.x, y: it.y });
@@ -55,11 +72,15 @@ export function bouwIndex(bladen) {
       const opGrote = grote.filter((p) => perBlad.has(p)).length / grote.length;
       if (opGrote >= STEMPEL_AANDEEL_GROOT) continue;              // stempeltekst
     }
+    // Toon de schrijfwijze die het vaakst op de tekeningen staat: "T-1" als
+    // de architect die zo schrijft, ook al heet hij in de index T1.
+    const sw = [...(schrijfwijzen.get(code) || new Map())].sort((a, b) => b[1] - a[1]);
     uit.set(code, {
-      code,
+      code: sw.length ? sw[0][0] : code,
+      sleutel: code,
       bladen: [...perBlad.keys()].sort((a, b) => a - b),
       voorkomens: perBlad,
-      definitie: kiesDefinitie(code, perBlad, bladen, codesPerBlad),
+      ...kiesDefinitie(code, perBlad, bladen, codesPerBlad),
     });
   }
   return uit;
@@ -93,7 +114,11 @@ function kiesDefinitie(code, perBlad, bladen, codesPerBlad) {
   }
   // Staat de code overal even los, dan wijzen we niets aan: liever geen
   // verwijzing dan een verkeerde.
-  return beste && beste.verschillend >= 2 ? beste.page : null;
+  if (!beste || beste.verschillend < 2) return { definitie: null, definitieIsStaat: false };
+  // Een STAAT (klein blad) beschrijft de code echt. Een groot tekeningblad —
+  // de gevel draagt alle raamcodes naast elkaar — gebruikt hem alleen. Dat
+  // onderscheid bepaalt of een detail in een ánder projectdeel voorgaat.
+  return { definitie: beste.page, definitieIsStaat: !grootVan.get(beste.page) };
 }
 
 /** Vind de code onder de aanwijzer, of null. `marge` in dezelfde eenheid als x/y. */

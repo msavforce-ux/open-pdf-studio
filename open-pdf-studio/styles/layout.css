@@ -802,3 +802,15 @@ body.pdf-cursor-override #canvas-container * {
 .panel-resize-handle.verborgen {
   display: none;
 }
+
+/* Een code op de tekening waarvoor een verwijzing bestaat. Gestippeld
+   onderstreept: zichtbaar genoeg om te vinden, rustig genoeg om een
+   bouwtekening niet te vervuilen. */
+.textLayer span.is-verwijzing {
+  border-bottom: 1px dotted var(--theme-panel-accent, #e08a3c);
+  background: rgba(224, 138, 60, 0.12);
+}
+
+.textLayer span.is-verwijzing:hover {
+  background: rgba(224, 138, 60, 0.35);
+}

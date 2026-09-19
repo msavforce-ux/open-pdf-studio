@@ -352,6 +352,16 @@ export async function createTextLayer(page, viewport, container, pageNum) {
   const unscaledHeight = viewport.height / viewport.scale;
   injectSyntheticTextSpans(textLayerDiv, pageNum, unscaledWidth, unscaledHeight);
 
+  // Codes (L-1, SP-1, T4) aanklikbaar maken. De tekstlaag ligt al precies
+  // over de tekening, dus hier hoeft niets bijgetekend te worden.
+  try {
+    const [{ markeerVerwijzingen }, { heeftVerwijzing }] = await Promise.all([
+      import('../pdf/verwijzing-markering.js'),
+      import('../solid/stores/verwijzingStore.js'),
+    ]);
+    markeerVerwijzingen(textLayerDiv, heeftVerwijzing);
+  } catch { /* zonder index blijft de tekstlaag gewoon tekst */ }
+
   // endOfContent-marker als laatste kind (mitigatie omgekeerde sleep)
   ensureEndOfContent(textLayerDiv);
 
