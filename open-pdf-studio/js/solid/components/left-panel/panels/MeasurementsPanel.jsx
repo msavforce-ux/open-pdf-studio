@@ -7,6 +7,7 @@ import { showProperties } from '../../../../ui/panels/properties-panel.js';
 import { goToPage } from '../../../../pdf/renderer.js';
 import { recordDelete } from '../../../../core/undo-manager.js';
 import { useTranslation } from '../../../../i18n/useTranslation.js';
+import { groepeerMetingen } from '../../../../annotations/meting-groepering.js';
 
 function redraw() {
   const doc = getActiveDocument();
@@ -58,32 +59,18 @@ export default function MeasurementsPanel() {
     return (doc.annotations || []).filter(a => measureTypes.has(a.type));
   });
 
-  // ── Grouped by type ──
-  const groupedMeasurements = createMemo(() => {
-    const groups = {};
-    for (const m of measurements()) {
-      const type = m.type;
-      if (!groups[type]) groups[type] = [];
-      groups[type].push(m);
-    }
-    return groups;
-  });
+  // ── Gegroepeerd op de naam van het gereedschap ──
+  // Niet op type: de calculator leest zijn eigen posten ("SM-01 Binnenwanden"),
+  // over alle bladen heen. Naamloze metingen vallen terug op hun type.
+  const groups = createMemo(() => groepeerMetingen(measurements(), (type) => typeLabels[type] || type));
 
-  // ── Totals per type ──
-  const totals = createMemo(() => {
-    const result = {};
-    for (const [type, items] of Object.entries(groupedMeasurements())) {
-      if (type === 'measureAngle') {
-        result[type] = items.length + ' angles';
-      } else {
-        const values = items.filter(m => m.measureValue != null).map(m => m.measureValue);
-        const sum = values.reduce((a, b) => a + b, 0);
-        const unit = items[0]?.measureUnit || '';
-        result[type] = sum.toFixed(2) + ' ' + unit;
-      }
-    }
-    return result;
-  });
+  /** Het totaal zoals het in de kop van een groep komt te staan. */
+  function groepTotaal(g) {
+    if (g.items.every(m => m.type === 'measureAngle')) return g.items.length + ' \u00D7';
+    if (!g.som) return '';
+    if (g.som.waarde == null) return '\u2014';  // eenheden niet gelijk te trekken
+    return g.som.waarde.toFixed(2) + (g.som.eenheid ? ' ' + g.som.eenheid : '');
+  }
 
   // ── Click to navigate ──
   function navigateTo(ann) {
@@ -170,24 +157,23 @@ export default function MeasurementsPanel() {
         <Show when={measurements().length === 0}>
           <div class="measurements-empty">{t('measurements.noMeasurements') || 'No measurements yet'}</div>
         </Show>
-        <For each={Object.entries(groupedMeasurements())}>
-          {([type, items]) => (
-            <div class="measurements-group">
+        <For each={groups()}>
+          {(g) => (
+            <div class="measurements-group" classList={{ 'is-naamloos': !g.benoemd }}>
               <div class="measurements-group-header">
-                <span>{typeLabels[type] || type}</span>
-                <span class="measurements-group-total">{totals()[type]}</span>
+                <span>{g.naam}</span>
+                <span class="measurements-group-total">{groepTotaal(g)}</span>
               </div>
-              <For each={items}>
+              <For each={g.items}>
                 {(m) => (
                   <div class="measurements-item" classList={{ selected: getActiveDocument()?.selectedAnnotation?.id === m.id }}
                     onClick={() => navigateTo(m)}>
                     <div class="measurements-item-icon">{typeIcons[m.type] || '\u2022'}</div>
                     <div class="measurements-item-info">
-                      <div class="measurements-item-name">{m.label || m.measureText || 'Measurement'}</div>
-                      <div class="measurements-item-detail">
-                        Page {m.page}
-                        {m.measureText ? ' \u2022 ' + m.measureText : ''}
-                      </div>
+                      {/* De groepskop draagt al de naam; de regel zelf toont
+                          dus de gemeten waarde en het blad waar hij staat. */}
+                      <div class="measurements-item-name">{m.measureText || m.label || 'Measurement'}</div>
+                      <div class="measurements-item-detail">{(t('leftPanel.page') || 'Page') + ' ' + m.page}</div>
                     </div>
                   </div>
                 )}
