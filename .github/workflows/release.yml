@@ -80,7 +80,7 @@ jobs:
             args: ''
             target: 'linux'
           - platform: 'macos-26'
-            args: ${{ format('--target universal-apple-darwin {0}', env.UPDATER_SLEUTEL != 'true' && env.GEEN_UPDATER_ARG || '') }}
+            args: '--target universal-apple-darwin'
             target: 'macos'
           - platform: 'windows-latest'
             args: ''
