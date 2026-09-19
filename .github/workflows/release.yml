@@ -93,6 +93,12 @@ jobs:
     env:
       TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
       TAURI_SIGNING_PRIVATE_KEY_PASSWORD: 'tauri2026'
+      # Een fork heeft de code-signing-certificaten van het project niet. Zonder
+      # deze schakelaars sneuvelt de Windows-build al bij het installeren van de
+      # signing-tools, dus vóór er ook maar iets gecompileerd is. Staan de
+      # secrets er wel, dan verandert er niets aan het officiële pad.
+      ONDERTEKENEN_WIN: ${{ secrets.AZURE_CLIENT_ID != '' }}
+      ONDERTEKENEN_MAC: ${{ secrets.APPLE_CERTIFICATE != '' }}
       # Do not bundle the display stack into the AppImage. Bundled Ubuntu-era
       # libwayland/xkbcommon/xcb shadow the host copies and abort WebKit with
       # "Could not create default EGL display: EGL_BAD_PARAMETER" on newer Mesa
@@ -145,7 +151,7 @@ jobs:
       # so the signatures that end up in the installer come from Tauri's
       # signCommand, configured in the next step.
       - name: Install Azure signing tools (Windows)
-        if: contains(matrix.target, 'windows')
+        if: contains(matrix.target, 'windows') && env.ONDERTEKENEN_WIN == 'true'
         uses: azure/trusted-signing-action@v1
         with:
           azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
@@ -168,7 +174,7 @@ jobs:
       # resource DLLs, uninstall.exe and the installer. This CI-only config
       # points signCommand at the signtool + dlib installed above.
       - name: Configure Tauri sign command (Windows)
-        if: contains(matrix.target, 'windows')
+        if: contains(matrix.target, 'windows') && env.ONDERTEKENEN_WIN == 'true'
         shell: pwsh
         env:
           AZURE_ENDPOINT: ${{ secrets.AZURE_ENDPOINT }}
@@ -247,7 +253,7 @@ jobs:
       # kopieert. Eigen tijdelijke keychain; tauri-action maakt daarna zijn
       # eigen import — geen conflict.
       - name: Sign libpdfium.dylib (macOS)
-        if: matrix.target == 'macos'
+        if: matrix.target == 'macos' && env.ONDERTEKENEN_MAC == 'true'
         shell: bash
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
@@ -328,7 +334,7 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         with:
           projectPath: open-pdf-studio
-          args: ${{ matrix.target == 'windows-system' && '--config src-tauri/tauri.signing.conf.json' || matrix.args }}
+          args: ${{ (matrix.target == 'windows-system' && env.ONDERTEKENEN_WIN == 'true') && '--config src-tauri/tauri.signing.conf.json' || matrix.args }}
           releaseId: ${{ needs.create-release.outputs.release_id }}
           includeUpdaterJson: true
 
@@ -397,14 +403,14 @@ jobs:
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
         with:
           projectPath: open-pdf-studio
-          args: --config src-tauri/tauri.signing.conf.json
+          args: ${{ env.ONDERTEKENEN_WIN == 'true' && '--config src-tauri/tauri.signing.conf.json' || '' }}
 
       # Proof on what users actually get: install the signed installer silently
       # on the runner and check the signatures of the installed binaries,
       # including uninstall.exe. A silent install skips the hook pages, so no
       # printer, file association or shortcut is set up.
       - name: Verify installed binaries are signed (Windows)
-        if: contains(matrix.target, 'windows')
+        if: contains(matrix.target, 'windows') && env.ONDERTEKENEN_WIN == 'true'
         shell: pwsh
         run: |
           $nsis = "$env:GITHUB_WORKSPACE/target/release/bundle/nsis"
