@@ -106,9 +106,9 @@
     },
     "updater": {
       "endpoints": [
-        "https://github.com/OpenAEC-Foundation/OpenPDFStudio/releases/latest/download/latest.json"
+        "https://github.com/msavforce-ux/open-pdf-studio/releases/latest/download/latest.json"
       ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDU4N0ZBNjRBREVFNDE2M0EKUldRNkZ1VGVTcVovV0xkNk53STYvdXExbWtkTThIdDdzS0JFdG5VTXBqUlpFOUYrcm1rYTA0eTYK"
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDc1M0NDNEEwQzdCQ0U2RUEKUldUcTVyekhvTVE4ZFNQRTE3Ui9EUHdZQkxyT0oxV1lWeEU3ZmNQZzRHT3Q2eVZ6a0VBa0FQSm0K"
     },
     "deep-link": {
       "mobile": [
