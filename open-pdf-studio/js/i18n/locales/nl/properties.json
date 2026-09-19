@@ -385,7 +385,8 @@
       "symbol": "Symbolen-staat",
       "text": "Tekst-staat",
       "full": "Volledige hoeveelheden",
-      "image": "Afbeeldingen & stempels"
+      "image": "Afbeeldingen & stempels",
+      "toolchest": "Gereedschapskist-staat"
     },
     "preview": "Voorbeeld",
     "exportCsv": "CSV exporteren"

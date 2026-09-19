@@ -68,6 +68,21 @@ export const STANDARD_SCHEDULE_TEMPLATES = [
     },
   },
   {
+    // De gereedschapskist-staat. De standaardstaten groeperen op TYPE
+    // (lengte, oppervlak, aantal) — dat vertelt de calculator niets: hij wil
+    // "SM-01 Binnenwanden", niet "lengte". Een gereedschap uit de kist zet
+    // zijn naam in label/subject, dus daarop groeperen geeft precies de ene
+    // opgetelde regel per gereedschap, over alle bladen heen.
+    id: 'toolchest',
+    nameKey: 'schedules.tpl.toolchest',
+    config: {
+      categories: ['area', 'line-based', 'count'],
+      fields: ['label', 'type', 'page', 'length', 'area', 'count'],
+      sort: [{ field: 'label', dir: 'asc', group: true, header: true, footer: true }],
+      itemize: true,
+    },
+  },
+  {
     id: 'full',
     nameKey: 'schedules.tpl.full',
     config: {

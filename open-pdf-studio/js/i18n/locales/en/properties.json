@@ -385,7 +385,8 @@
       "symbol": "Symbol schedule",
       "text": "Text schedule",
       "full": "Full quantities",
-      "image": "Images & stamps"
+      "image": "Images & stamps",
+      "toolchest": "Tool chest quantities"
     },
     "preview": "Preview",
     "exportCsv": "Export CSV"
