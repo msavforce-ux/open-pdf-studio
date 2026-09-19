@@ -127,6 +127,44 @@ export function normaliseerMeting(value, unit) {
   return { value, unit: unit || null };
 }
 
+// Meters per eenheid. Een staat toont bewust de tekeneenheid van het blad
+// (millimeters blijven millimeters), maar optellen mag alleen na omrekenen:
+// 4360 mm + 12 m is 16,36 m, niet 4372. Zie omrekenen() hieronder.
+const LENGTE_IN_M = {
+  mm: 0.001, cm: 0.01, dm: 0.1, m: 1, km: 1000,
+  in: 0.0254, '"': 0.0254, ft: 0.3048, "'": 0.3048, yd: 0.9144,
+};
+
+const OPPERVLAK_IN_M2 = {
+  'mm²': 1e-6, 'cm²': 1e-4, 'dm²': 1e-2, 'm²': 1,
+  'in²': 0.00064516, 'ft²': 0.09290304, 'yd²': 0.83612736,
+};
+
+function factor(unit) {
+  if (!unit) return null;
+  const u = String(unit).trim();
+  if (Object.hasOwn(OPPERVLAK_IN_M2, u)) return { f: OPPERVLAK_IN_M2[u], soort: 'vlak' };
+  const kleine = u.toLowerCase();
+  if (Object.hasOwn(LENGTE_IN_M, kleine)) return { f: LENGTE_IN_M[kleine], soort: 'lengte' };
+  return null;
+}
+
+/**
+ * Reken `value` om van `van` naar `naar`. Gelijke eenheden (of een ontbrekende
+ * eenheid, wat betekent "staat al in de kolomeenheid") gaan ongewijzigd door.
+ * Zijn de eenheden niet in elkaar om te rekenen — millimeters en punten, of
+ * lengte tegen oppervlak — dan komt er `null` uit: dan is er geen getal dat
+ * klopt, en een som die er wél uitziet is erger dan geen som.
+ */
+export function omrekenen(value, van, naar) {
+  if (typeof value !== 'number' || Number.isNaN(value)) return null;
+  if (!van || !naar || van === naar) return value;
+  const a = factor(van);
+  const b = factor(naar);
+  if (!a || !b || a.soort !== b.soort) return null;
+  return (value * a.f) / b.f;
+}
+
 // Getekende vlakken (dus niet de meet-vlakken, die hun exacte waarde al
 // dragen) waarvan de oppervlakte uit de geometrie volgt. scaleRegion valt er
 // bewust buiten: dat is een hulpobject, geen hoeveelheid.

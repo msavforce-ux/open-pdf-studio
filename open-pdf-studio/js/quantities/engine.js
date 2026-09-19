@@ -1,5 +1,5 @@
 // Hoeveelheden — schedule-engine (puur). filter → sorteer → groepeer → totaliseer.
-import { categoryOf, fieldsForCategories, qLabel } from './categories.js';
+import { categoryOf, fieldsForCategories, omrekenen, qLabel } from './categories.js';
 
 const OPS = {
   '=':   (a, b) => String(a ?? '') === String(b ?? ''),
@@ -57,16 +57,31 @@ function safeGet(f, el) {
   try { return f.get(el); } catch { return null; }
 }
 
+// Optellen gebeurt in de eenheid die boven de kolom staat. Een blad dat in
+// millimeters gekalibreerd is en een blad in meters leverden anders hun ruwe
+// getallen bij elkaar op: 4360 (mm) + 12 (m) = 4372, met één eenheid erboven.
+// Dat getal ziet er volkomen normaal uit en is fout — precies het soort fout
+// dat pas in de calculatie opvalt. Is een waarde niet naar de kolomeenheid om
+// te rekenen, dan komt er geen som: leeg is eerlijk, een verzonnen getal niet.
 function subtotal(rows, colDefs) {
   const out = {};
   for (const f of colDefs) {
     if (f.kind !== 'number' || f.total === false) continue;
-    let sum = 0, any = false;
+    let sum = 0, any = false, onoptelbaar = false;
     for (const r of rows) {
       const v = r.vals[f.key];
-      if (typeof v === 'number' && !Number.isNaN(v)) { sum += v; any = true; }
+      if (typeof v !== 'number' || Number.isNaN(v)) continue;
+      let w = v;
+      if (typeof f.unitOf === 'function') {
+        let eigen = null;
+        try { eigen = f.unitOf(r.el); } catch { eigen = null; }
+        w = omrekenen(v, eigen, f.unit);
+        if (w == null) { onoptelbaar = true; break; }
+      }
+      sum += w;
+      any = true;
     }
-    out[f.key] = any ? sum : null;
+    out[f.key] = (any && !onoptelbaar) ? sum : null;
   }
   return out;
 }
