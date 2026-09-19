@@ -80,7 +80,7 @@ async function extractPageText(pdfDoc, pageNum, doc) {
 /**
  * Extract text content from all pages (cached)
  */
-export async function extractAllText(pdfDoc) {
+async function extractAllText(pdfDoc) {
   const doc = getActiveDocument();
   const docId = doc?.id;
   const hasTextEdits = doc?.textEdits?.length > 0;

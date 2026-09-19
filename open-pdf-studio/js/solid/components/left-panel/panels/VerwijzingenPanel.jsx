@@ -3,7 +3,7 @@ import { activeTab } from '../../../stores/leftPanelStore.js';
 import { getActiveDocument } from '../../../../core/state.js';
 import { useTranslation } from '../../../../i18n/useTranslation.js';
 import {
-  verwijzingen, bezig, gebouwdVoor, bouwVerwijzingen, openVerwijzing,
+  verwijzingen, bezig, gebouwdVoor, voortgang, fout, bouwVerwijzingen, openVerwijzing,
 } from '../../../stores/verwijzingStore.js';
 
 export default function VerwijzingenPanel() {
@@ -28,9 +28,17 @@ export default function VerwijzingenPanel() {
       <div class="left-panel-header">
         <span>{t('verwijzingen.title') || 'Sheet references'}</span>
         <button class="schedule-header-btn" disabled={bezig()} onClick={bouwVerwijzingen}>
-          {bezig() ? (t('verwijzingen.busy') || 'Scanning…') : (t('verwijzingen.scan') || 'Scan')}
+          {bezig()
+            ? (voortgang() ? `${voortgang().blad}/${voortgang().totaal}` : (t('verwijzingen.busy') || 'Scanning…'))
+            : (t('verwijzingen.scan') || 'Scan')}
         </button>
       </div>
+
+      <Show when={fout()}>
+        <div class="measurements-empty" style="color:#e06c6c;">
+          {(t('verwijzingen.failed') || 'Scan failed') + ': ' + fout()}
+        </div>
+      </Show>
 
       <Show when={actueel()} fallback={
         <div class="measurements-empty">

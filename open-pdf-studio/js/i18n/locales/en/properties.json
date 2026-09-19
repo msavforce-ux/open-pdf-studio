@@ -624,6 +624,7 @@
     "hint": "Scan the set to find codes like L-1 or BS-2 and the sheet that describes them.",
     "describedOn": "Described on sheet",
     "noSheet": "No describing sheet",
-    "usedOn": "Used on"
+    "usedOn": "Used on",
+    "failed": "Scan failed"
   }
 }
