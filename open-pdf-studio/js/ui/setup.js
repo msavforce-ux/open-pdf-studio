@@ -151,8 +151,12 @@ function setupPanelResize() {
         // Don't resize if collapsed
         if (leftPanel.classList.contains('collapsed')) return;
         const isRtl = document.documentElement.dir === 'rtl';
+        // Staat het paneel rechts, dan ligt de greep aan zijn linkerkant:
+        // naar rechts slepen maakt het paneel dan smaller, niet breder.
+        const rechts = leftPanel.classList.contains('aan-rechterkant');
         const delta = e.clientX - startX;
-        const newWidth = Math.max(120, Math.min(500, startWidth + (isRtl ? -delta : delta)));
+        const teken = (isRtl ? -1 : 1) * (rechts ? -1 : 1);
+        const newWidth = Math.max(120, Math.min(500, startWidth + teken * delta));
         leftPanel.style.width = newWidth + 'px';
       };
 

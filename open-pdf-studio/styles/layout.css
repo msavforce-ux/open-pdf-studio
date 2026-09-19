@@ -779,3 +779,26 @@ body.pdf-cursor-override #canvas-container * {
   border-color: #e81123;
   color: #ffffff;
 }
+
+/* Navigatiepaneel aan de rechterkant.
+   De tabstrip hoort tegen de vensterrand, dus de kolommen keren om: eerst de
+   inhoud, dan de tabs. Alleen de randen en de actief-markering volgen mee. */
+.left-panel.aan-rechterkant {
+  flex-direction: row-reverse;
+}
+
+.left-panel.aan-rechterkant .left-panel-tabs {
+  border-right: none;
+  border-left: 1px solid var(--theme-panel-border);
+}
+
+.left-panel.aan-rechterkant .left-panel-tab.active {
+  border-left: none;
+  border-right: 2px solid var(--theme-panel-accent);
+}
+
+/* De greep staat rechts vóór het paneel in de DOM, dus de bestaande
+   buur-selector (.collapsed + .panel-resize-handle) grijpt daar niet. */
+.panel-resize-handle.verborgen {
+  display: none;
+}

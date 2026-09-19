@@ -14,7 +14,10 @@ import { removeLineworkCatalog } from '../../symbols/linework-catalog-store.js';
 const [searchQuery, setSearchQuery] = createSignal('');
 const [expandedCategories, setExpandedCategories] = createSignal(new Set(['electrical']));
 const [symbolPaletteVisible, setSymbolPaletteVisibleRaw] = createSignal(true);
-const [symbolPaletteMode, setSymbolPaletteModeRaw] = createSignal('docked-right');
+// Links, tegenover het navigatiepaneel rechts: de gereedschapskist is wat je
+// aanklikt vóór je meet, de metingenlijst is wat je erna leest. Bestaande
+// installaties houden hun eigen keuze — die staat in de voorkeuren.
+const [symbolPaletteMode, setSymbolPaletteModeRaw] = createSignal('docked-left');
 const [symbolFloatPos, setSymbolFloatPos] = createSignal({ x: 300, y: 150 });
 const [settingsOpen, setSettingsOpen] = createSignal(false);
 const [disabledGroups, setDisabledGroupsRaw] = createSignal(new Set());
@@ -255,7 +258,7 @@ function initSymbolPalette() {
   if (prefs.disabledSymbolGroups) setDisabledGroupsRaw(new Set(prefs.disabledSymbolGroups));
   if (prefs.symbolLibraryIndustry != null) setSelectedIndustryRaw(prefs.symbolLibraryIndustry);
   if (prefs.symbolLibraryCountry != null) setSelectedCountryRaw(prefs.symbolLibraryCountry);
-  const mode = prefs.symbolPaletteMode || 'docked-right';
+  const mode = prefs.symbolPaletteMode || 'docked-left';
   setSymbolPaletteModeRaw(mode);
   if (prefs.symbolPaletteFloatX != null) {
     setSymbolFloatPos({ x: prefs.symbolPaletteFloatX, y: prefs.symbolPaletteFloatY ?? 150 });

@@ -1,5 +1,5 @@
-import { For } from 'solid-js';
-import { activeTab, collapsed, toggleLeftPanelCollapsed } from '../../stores/leftPanelStore.js';
+import { For, Show } from 'solid-js';
+import { activeTab, collapsed, panelSide, toggleLeftPanelCollapsed } from '../../stores/leftPanelStore.js';
 import LeftPanelTab from './LeftPanelTab.jsx';
 import {
   thumbnailsIcon, bookmarksIcon, annotationsIcon, attachmentsIcon,
@@ -38,9 +38,17 @@ export default function LeftPanel() {
     { panelId: 'schedules', title: () => t('leftPanel.schedules') || 'Schedules', label: () => t('leftPanel.schedules') || 'Schedules', icon: schedulesIcon },
   ];
 
+  // Rechts hoort de greep aan de BINNENkant van het paneel, dus vóór het
+  // paneel in de DOM; links erna. Anders pak je de greep aan de verkeerde kant.
+  const greep = () => (
+    <div class="panel-resize-handle" classList={{ verborgen: collapsed() }} id="left-panel-resize"></div>
+  );
+
   return (
     <>
-    <div class={`left-panel${collapsed() ? ' collapsed' : ''}`} id="left-panel">
+    <Show when={panelSide() === 'right'}>{greep()}</Show>
+    <div class={`left-panel${collapsed() ? ' collapsed' : ''}`}
+      classList={{ 'aan-rechterkant': panelSide() === 'right' }} id="left-panel">
       <div class="left-panel-tabs">
         <For each={TABS}>
           {(tab) => (
@@ -74,7 +82,7 @@ export default function LeftPanel() {
         <span innerHTML={toggleIcon}></span>
       </button>
     </div>
-    <div class="panel-resize-handle" id="left-panel-resize"></div>
+    <Show when={panelSide() !== 'right'}>{greep()}</Show>
     </>
   );
 }
