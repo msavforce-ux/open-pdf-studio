@@ -38,10 +38,12 @@ function applyFmt(f, fmt, elements) {
     unit: eenheidVoor(f, elements),
     decimals: f.dec != null ? f.dec : (f.kind === 'number' ? 2 : 0),
     align: f.kind === 'number' ? 'right' : 'left',
-    // Beeldkolommen tellen nooit mee in som/subtotalen.
-    total: !isImage,
+    // Beeldkolommen tellen nooit mee in som/subtotalen. Bladnummers evenmin:
+    // die zijn wel een getal, maar blad 60 + blad 61 is geen 121. Zo'n som
+    // ziet er in een staat uit als een hoeveelheid en is er geen.
+    total: !isImage && f.optelbaar !== false,
   };
-  if (isImage) return { ...base, total: false };
+  if (isImage || f.optelbaar === false) return { ...base, total: false };
   if (!fmt) return base;
   return {
     ...base,

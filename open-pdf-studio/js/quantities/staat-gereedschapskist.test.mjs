@@ -57,3 +57,16 @@ test('subject telt mee als er geen label is — de kist zet allebei', () => {
   assert.ok(g, 'subject moet ook als naam gelden');
   assert.equal(g.subtotals.count, 2);
 });
+
+test('bladnummers worden niet opgeteld — blad 60 + blad 61 is geen 121', () => {
+  const res = buildSchedule([
+    { type: 'measureDistance', page: 60, label: 'SM-01', measureValue: 12_000, measureUnit: 'mm' },
+    { type: 'measureDistance', page: 61, label: 'SM-01', measureValue: 8_000, measureUnit: 'mm' },
+  ], KIST);
+
+  const g = groep(res, 'SM-01');
+  assert.equal(g.subtotals.page, undefined, 'geen subtotaal over bladnummers');
+  assert.equal(res.grandTotals.page, undefined, 'ook geen eindtotaal');
+  assert.equal(g.subtotals.length, 20_000, 'de hoeveelheid telt wél op');
+  assert.equal(kolom(res, 'page').total, false);
+});

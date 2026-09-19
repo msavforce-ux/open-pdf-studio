@@ -98,8 +98,8 @@ export function typeName(type) {
 // teruggeeft. De engine kiest daarmee de kolomeenheid, zodat een staat niet
 // langer "m²" boven millimeters kan zetten. Levert hij niets op, dan geldt de
 // vaste `unit` als terugval.
-const F = (key, fallback, kind, get, unit = '', dec, unitOf) => ({
-  key, kind, unit, unitOf, get, dec,
+const F = (key, fallback, kind, get, unit = '', dec, unitOf, optelbaar = true) => ({
+  key, kind, unit, unitOf, get, dec, optelbaar,
   labelKey: `quantities.field.${key}`,
   get label() { return qLabel(`quantities.field.${key}`, fallback); },
 });
@@ -299,7 +299,8 @@ function realArea(el) {
 const COMMON = [
   F('category', 'Category', 'text', el => categoryLabel(categoryOf(el))),
   F('type', 'Type', 'text', el => typeName(el.type)),
-  F('page', 'Page', 'number', el => el.page || 1, '', 0),
+  // Bladnummer: een getal, maar geen hoeveelheid — nooit optellen.
+  F('page', 'Page', 'number', el => el.page || 1, '', 0, undefined, false),
   // measureName is de naam die je in het eigenschappenpaneel aan een
   // meet-vlak geeft ("Woonkamer"). Die stond nergens in de staat, waardoor de
   // Label-kolom voor oppervlaktes altijd leeg bleef.
