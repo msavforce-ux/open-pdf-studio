@@ -614,5 +614,15 @@
     "symbolLabel": "Symbol",
     "typeLabel": "Type",
     "unknownSymbol": "Unknown symbol"
+  },
+  "verwijzingen": {
+    "title": "Bladverwijzingen",
+    "scan": "Scannen",
+    "busy": "Bezig…",
+    "none": "Geen bladverwijzingen gevonden",
+    "hint": "Scan de set om codes als L-1 of BS-2 te vinden en het blad dat ze beschrijft.",
+    "describedOn": "Beschreven op blad",
+    "noSheet": "Geen beschrijvend blad",
+    "usedOn": "Gebruikt op"
   }
 }

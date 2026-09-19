@@ -14,6 +14,7 @@ import {
   focusCompareTab,
   blurCompareTab,
   exitCompare,
+  compareSplitOnly,
   compareOldPath,
   compareNewPath,
 } from '../../compare/compare-store.js';
@@ -507,7 +508,11 @@ export default function DocumentTabs() {
             <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="flex:none;">
               <rect x="3" y="4" width="7" height="16" /><rect x="14" y="4" width="7" height="16" />
             </svg>
-            {t('compareTabTitle') || 'Vergelijken'}
+            {/* Dezelfde tab draagt twee taken: vergelijken en de gesplitste
+                weergave. De titel moet zeggen welke van de twee je ziet. */}
+            {compareSplitOnly()
+              ? (t('compare.splitLabel') || 'Split view')
+              : (t('compareTabTitle') || 'Vergelijken')}
           </span>
           <span class="document-tab-close" title={t('closeTab')} onClick={(e) => { e.stopPropagation(); exitCompare(); }}>&times;</span>
         </div>

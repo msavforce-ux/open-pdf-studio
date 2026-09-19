@@ -67,3 +67,9 @@ export const schedulesIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="curre
 export const toggleIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
   <polyline points="15 18 9 12 15 6"/>
 </svg>`;
+
+// Bladverwijzingen: twee bladen met een pijl ertussen — van de code op de
+// tekening naar het blad dat hem beschrijft.
+export const verwijzingenIcon = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+<rect x="2" y="4" width="7" height="14" rx="1"/><rect x="15" y="6" width="7" height="14" rx="1"/>
+<path d="M9 9h4M13 9l-2-2M13 9l-2 2"/></svg>`;
