@@ -1415,6 +1415,52 @@ export async function reRenderVisibleContinuousPages() {
 
 // ─── Continuous mode: zoom + scroll/page sync ───────────────────────────────
 
+// Rek de al gerenderde bitmaps van één pagina mee naar de nieuwe doos. Apart
+// gezet omdat de settle-pass hetzelfde moet doen voor pagina's die tijdens het
+// gebaar buiten beeld stonden.
+function _schaalPaginaCanvases(cc, factor, w, h) {
+  cc.querySelectorAll('canvas').forEach(cv => {
+    if (cv.classList.contains('annotation-canvas')) {
+      // Viewport-gebonden uitsnede: maat en positie schalen mee met het
+      // gebaar; de settle-hertekening zet hem daarna exact.
+      cv.style.width = ((parseFloat(cv.style.width) || 0) * factor) + 'px';
+      cv.style.height = ((parseFloat(cv.style.height) || 0) * factor) + 'px';
+      cv.style.left = ((parseFloat(cv.style.left) || 0) * factor) + 'px';
+      cv.style.top = ((parseFloat(cv.style.top) || 0) * factor) + 'px';
+      cv.dataset.clipX = (parseFloat(cv.dataset.clipX) || 0) * factor;
+      cv.dataset.clipY = (parseFloat(cv.dataset.clipY) || 0) * factor;
+      return;
+    }
+    if (cv.classList.contains('annotation-canvas-sharp') || cv.classList.contains('pdf-canvas-sharp')) {
+      // De viewport-uitsnede schaalt mee met de pagina (maat én positie);
+      // de settle-hertekening vervangt hem daarna door een exacte uitsnede.
+      cv.style.width = `${(parseFloat(cv.style.width) || 0) * factor}px`;
+      cv.style.height = `${(parseFloat(cv.style.height) || 0) * factor}px`;
+      cv.style.left = `${(parseFloat(cv.style.left) || 0) * factor}px`;
+      cv.style.top = `${(parseFloat(cv.style.top) || 0) * factor}px`;
+      return;
+    }
+    cv.style.width = `${w}px`;
+    cv.style.height = `${h}px`;
+  });
+}
+
+// Pagina's die tijdens het zoomgebaar buiten beeld stonden dragen hun
+// opgespaarde factor in `zoomPending`; die wordt hier alsnog toegepast zodra
+// het gebaar tot rust komt, zodat een pagina waar de gebruiker naartoe scrolt
+// nooit op een verouderde maat staat.
+function flushUitgesteldeZoomCanvases() {
+  const cont = document.getElementById('continuous-container');
+  if (!cont) return;
+  cont.querySelectorAll('.page-wrapper[data-zoom-pending]').forEach(wrapper => {
+    const factor = parseFloat(wrapper.dataset.zoomPending) || 1;
+    delete wrapper.dataset.zoomPending;
+    const cc = wrapper.querySelector('.canvas-container-cont');
+    if (!cc || factor === 1) return;
+    _schaalPaginaCanvases(cc, factor, parseFloat(cc.style.width) || 0, parseFloat(cc.style.height) || 0);
+  });
+}
+
 // Instant zoom: resize every page's container + its rendered canvases straight
 // to the new scale and re-anchor the scroll in the SAME synchronous frame, so
 // the page tracks the wheel/button immediately. The crisp Rust re-render is
@@ -1443,12 +1489,22 @@ function _applyContinuousZoomInstant(oldScale, anchorY = null, anchorX = null) {
   const pageEls = [...cont.querySelectorAll('.page-wrapper .canvas-container-cont')];
   // left/right meegeven: in boek-/dubbelepaginaweergave delen twee pagina's
   // dezelfde verticale grenzen en moet de horizontale positie beslissen.
-  const refIdx = pickAnchorPageIndex(pageEls.map(el => {
+  const rects = pageEls.map(el => {
     const r = el.getBoundingClientRect();
     return { top: r.top, bottom: r.bottom, left: r.left, right: r.right };
-  }), ay, ax);
+  });
+  const refIdx = pickAnchorPageIndex(rects, ay, ax);
   const refEl = refIdx >= 0 ? pageEls[refIdx] : null;
   const rectBefore = refEl ? refEl.getBoundingClientRect() : null;
+  // Hergebruik de rects die het anker al opleverde om te bepalen welke
+  // pagina's in beeld staan. Alleen die krijgen hun bitmaps per frame
+  // meegerekt: bij een volledige tekeningenset (73 pagina's) kostte dat
+  // anders ~250 canvas-stijlschrijvingen per wielklik, en dát is wat het
+  // doorlopend zoomen deed haperen. De rest telt de factor op in
+  // `zoomPending` en wordt bijgewerkt zodra het gebaar tot rust komt.
+  const rectPerCc = new Map();
+  pageEls.forEach((el, i) => rectPerCc.set(el, rects[i]));
+  const marge = container.clientHeight;
   cont.querySelectorAll('.page-wrapper').forEach(wrapper => {
     const cc = wrapper.querySelector('.canvas-container-cont');
     if (!cc) return;
@@ -1460,32 +1516,17 @@ function _applyContinuousZoomInstant(oldScale, anchorY = null, anchorX = null) {
     const h = (baseW && baseH) ? baseH * newScale : (parseFloat(cc.style.height) || cc.offsetHeight) * factor;
     cc.style.width = `${w}px`;
     cc.style.height = `${h}px`;
-    // Stretch the already-rendered bitmap(s) to the new box immediately; the
-    // debounced re-render replaces them with a crisp render at the new scale.
-    cc.querySelectorAll('canvas').forEach(cv => {
-      if (cv.classList.contains('annotation-canvas')) {
-        // Viewport-gebonden uitsnede: maat en positie schalen mee met het
-        // gebaar; de settle-hertekening zet hem daarna exact.
-        cv.style.width = ((parseFloat(cv.style.width) || 0) * factor) + 'px';
-        cv.style.height = ((parseFloat(cv.style.height) || 0) * factor) + 'px';
-        cv.style.left = ((parseFloat(cv.style.left) || 0) * factor) + 'px';
-        cv.style.top = ((parseFloat(cv.style.top) || 0) * factor) + 'px';
-        cv.dataset.clipX = (parseFloat(cv.dataset.clipX) || 0) * factor;
-        cv.dataset.clipY = (parseFloat(cv.dataset.clipY) || 0) * factor;
-        return;
-      }
-      if (cv.classList.contains('annotation-canvas-sharp') || cv.classList.contains('pdf-canvas-sharp')) {
-        // De viewport-uitsnede schaalt mee met de pagina (maat én positie);
-        // de settle-hertekening vervangt hem daarna door een exacte uitsnede.
-        cv.style.width = `${(parseFloat(cv.style.width) || 0) * factor}px`;
-        cv.style.height = `${(parseFloat(cv.style.height) || 0) * factor}px`;
-        cv.style.left = `${(parseFloat(cv.style.left) || 0) * factor}px`;
-        cv.style.top = `${(parseFloat(cv.style.top) || 0) * factor}px`;
-        return;
-      }
-      cv.style.width = `${w}px`;
-      cv.style.height = `${h}px`;
-    });
+    const r = rectPerCc.get(cc);
+    const inBeeld = !r || (r.bottom > contRect.top - marge && r.top < contRect.bottom + marge);
+    if (!inBeeld) {
+      wrapper.dataset.zoomPending = String((parseFloat(wrapper.dataset.zoomPending) || 1) * factor);
+      return;
+    }
+    // Een pagina die nét in beeld schuift, draagt nog de factor van de
+    // frames waarin ze buiten beeld stond; die gaat hier in één keer mee.
+    const opgespaard = parseFloat(wrapper.dataset.zoomPending) || 1;
+    delete wrapper.dataset.zoomPending;
+    _schaalPaginaCanvases(cc, opgespaard * factor, w, h);
   });
   // Scroll-correctie ná de synchrone resize (getBoundingClientRect forceert
   // de reflow): zet het content-punt terug onder het anker. De browser
@@ -1517,6 +1558,7 @@ export function continuousZoomBy(factor, anchorY = null, anchorX = null) {
   if (_contRerenderTimer) clearTimeout(_contRerenderTimer);
   _contRerenderTimer = setTimeout(() => {
     _contRerenderTimer = null;
+    flushUitgesteldeZoomCanvases();
     if (getActiveDocument()?.viewMode !== 'continuous') return;
     reRenderVisibleContinuousPages();
   }, 130);
@@ -1534,6 +1576,7 @@ async function _continuousRezoom(oldScale) {
   if (_contRerenderTimer) clearTimeout(_contRerenderTimer);
   _contRerenderTimer = setTimeout(() => {
     _contRerenderTimer = null;
+    flushUitgesteldeZoomCanvases();
     if (getActiveDocument()?.viewMode !== 'continuous') return;
     reRenderVisibleContinuousPages();
   }, 130);
