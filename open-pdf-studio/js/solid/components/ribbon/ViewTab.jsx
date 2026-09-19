@@ -23,7 +23,7 @@ import { rotatePage } from '../../../pdf/renderer.js';
 import { recordPageRotation } from '../../../core/undo-manager.js';
 import { useTranslation } from '../../../i18n/useTranslation.js';
 import { openDialog } from '../../stores/dialogStore.js';
-import { compareActive, exitCompare } from '../../../compare/compare-store.js';
+import { compareActive, compareSplitOnly, exitCompare, startSplitView } from '../../../compare/compare-store.js';
 
 export default function ViewTab() {
   const { t } = useTranslation('ribbon');
@@ -132,6 +132,23 @@ export default function ViewTab() {
         </RibbonGroup>
 
         <RibbonGroup label={t('view.compareGroup') || 'Compare'}>
+          {/* Twee bladen van dezelfde set naast elkaar: plattegrond links,
+              doorsnede of detail rechts. Draait op dezelfde weergave als
+              Compare, alleen zonder verschildetectie. */}
+          <RibbonButton id="ribbon-split-view"
+            title={t('compare.splitTitle') || 'Split view — two sheets side by side'}
+            icon={`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16"/><line x1="12" y1="4" x2="12" y2="20"/></svg>`}
+            label={t('compare.splitLabel') || 'Split view'}
+            disabled={!getActiveDocument()?.filePath}
+            active={compareActive() && compareSplitOnly()}
+            onClick={() => {
+              if (compareActive()) { exitCompare(); return; }
+              const doc = getActiveDocument();
+              if (!doc?.filePath) return;
+              // De rechterpagina bepaalt de store zelf: die kent het
+              // paginaaantal van het document.
+              startSplitView(doc.filePath, doc.currentPage || 1);
+            }} />
           <RibbonButton id="ribbon-compare"
             title={t('compare.title') || 'Compare PDFs'}
             icon={`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="8" height="16"/><rect x="13" y="4" width="8" height="16"/><line x1="11" y1="12" x2="13" y2="12"/></svg>`}

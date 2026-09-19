@@ -245,7 +245,11 @@
     "modified": "Gewijzigd",
     "noChanges": "Geen wijzigingen",
     "textTab": "Tekst",
-    "noTextChanges": "Geen tekstverschillen"
+    "noTextChanges": "Geen tekstverschillen",
+    "splitTitle": "Gesplitste weergave",
+    "splitLabel": "Splitsen",
+    "leftPane": "Links",
+    "rightPane": "Rechts"
   },
   "organize": {
     "pages": "Pagina's",

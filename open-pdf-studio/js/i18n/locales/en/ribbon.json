@@ -245,7 +245,11 @@
     "modified": "Modified",
     "noChanges": "No changes",
     "textTab": "Text",
-    "noTextChanges": "No text differences"
+    "noTextChanges": "No text differences",
+    "splitTitle": "Split view",
+    "splitLabel": "Split view",
+    "leftPane": "Left",
+    "rightPane": "Right"
   },
   "organize": {
     "pages": "Pages",

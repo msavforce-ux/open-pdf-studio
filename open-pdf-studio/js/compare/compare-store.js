@@ -46,6 +46,13 @@ const [panelTab, setPanelTabSignal] = createSignal('changes');
 // Tekstvergelijkings-resultaat: null = nog niet uitgevoerd voor dit paar.
 const [textChanges, setTextChangesSignal] = createSignal(null);
 const [textComparing, setTextComparingSignal] = createSignal(false);
+// Gesplitste weergave: dezelfde twee panelen, maar zonder verschildetectie.
+// Bedoeld om twee bladen van ÉÉN set naast elkaar te leggen — plattegrond
+// links, doorsnede of detail rechts. De detectie is hier niet alleen zinloos
+// (het zijn verschillende tekeningen, niet twee revisies van dezelfde), ze
+// rastert ook beide bladen op volle resolutie: op een set bouwtekeningen is
+// dat seconden werk per paginawissel.
+const [splitOnly, setSplitOnly] = createSignal(false);
 
 export {
   active as compareActive,
@@ -76,6 +83,7 @@ export {
   panelTab as comparePanelTab,
   textChanges as compareTextChanges,
   textComparing as compareTextComparing,
+  splitOnly as compareSplitOnly,
 };
 
 export function setComparePanelTab(tab) {
@@ -150,10 +158,11 @@ function _resetPairDiff() {
   setFocusedChangeSignal(null);
 }
 
-export function startCompare({ oldFilePath, newFilePath, mode: m, oldPage: op = 1, newPage: np = 1 }) {
+export function startCompare({ oldFilePath, newFilePath, mode: m, oldPage: op = 1, newPage: np = 1, splitOnly: so = false }) {
   setOldPath(oldFilePath);
   setNewPath(newFilePath);
   setMode(m || 'overlay');
+  setSplitOnly(!!so);
   const oc = Math.max(1, _pageCountFor(oldFilePath));
   const nc = Math.max(1, _pageCountFor(newFilePath));
   setOldPageCount(oc);
@@ -172,9 +181,34 @@ export function startCompare({ oldFilePath, newFilePath, mode: m, oldPage: op = 
   setFocused(true); // open the compare tab in front
 }
 
+/**
+ * Twee bladen van hetzelfde document naast elkaar: plattegrond links, de
+ * bijbehorende doorsnede of het detail rechts. Draait op de bestaande
+ * naast-elkaar-weergave; alleen de verschildetectie blijft uit.
+ */
+export function startSplitView(filePath, leftPage = 1, rightPage = null) {
+  if (!filePath) return;
+  // Zonder expliciete rechterpagina: het blad ná het huidige, geklemd op het
+  // einde van de set. Twee keer hetzelfde blad naast elkaar heeft geen nut.
+  const aantal = Math.max(1, _pageCountFor(filePath));
+  const links = Math.max(1, Math.min(aantal, leftPage));
+  const rechts = rightPage != null
+    ? Math.max(1, Math.min(aantal, rightPage))
+    : Math.min(aantal, links + 1);
+  startCompare({
+    oldFilePath: filePath,
+    newFilePath: filePath,
+    mode: 'side',
+    oldPage: links,
+    newPage: rechts,
+    splitOnly: true,
+  });
+}
+
 export function exitCompare() {
   setActive(false);
   setFocused(false);
+  setSplitOnly(false);
   setOldPath(null);
   setNewPath(null);
   _resetPairDiff();

@@ -42,6 +42,7 @@ import {
   setCompareTextChanges,
   setCompareTextComparing,
   setPagePair,
+  compareSplitOnly,
 } from '../../../compare/compare-store.js';
 import {
   renderCompareSideBySide,
@@ -379,7 +380,10 @@ export default function CompareView() {
       return;
     }
     busy = true;
-    const skipDetection = !!opts2.skipDetection || pendingSkipDetection;
+    // In de gesplitste weergave liggen twee verschillende tekeningen naast
+    // elkaar; een verschillijst daartussen zegt niets en het rasteren van
+    // beide bladen op volle resolutie kost bij elke paginawissel seconden.
+    const skipDetection = compareSplitOnly() || !!opts2.skipDetection || pendingSkipDetection;
     pendingSkipDetection = false;
     const zoomAtRender = compareZoom();
     try {
@@ -762,8 +766,10 @@ export default function CompareView() {
           style="display:flex; align-items:center; gap:6px; padding:5px 10px; background:linear-gradient(#ffffff, #f5f5f5); border-bottom:1px solid #d4d4d4; color:#222; font-size:12px;"
         >
           {/* Titel + weergavemodus */}
-          <strong>{t('compare.title') || 'Compare PDFs'}</strong>
-          <span style="color:#666;">{compareMode() === 'overlay' ? (t('compare.overlay') || 'Overlay') : (t('compare.sideBySide') || 'Side-by-side')}</span>
+          <strong>{compareSplitOnly() ? (t('compare.splitTitle') || 'Split view') : (t('compare.title') || 'Compare PDFs')}</strong>
+          <Show when={!compareSplitOnly()}>
+            <span style="color:#666;">{compareMode() === 'overlay' ? (t('compare.overlay') || 'Overlay') : (t('compare.sideBySide') || 'Side-by-side')}</span>
+          </Show>
 
           <Sep />
 
@@ -875,7 +881,7 @@ export default function CompareView() {
             >
               <div style="flex:1 1 50%; min-width:0; position:relative; display:flex; border-right:1px solid #555;">
                 <div style="position:absolute; top:6px; left:8px; z-index:2; padding:2px 8px; background:rgba(40,40,40,0.85); color:#ddd; font-size:11px; pointer-events:none;">
-                  {t('compare.oldDoc') || 'Old'}
+                  {compareSplitOnly() ? (t('compare.leftPane') || 'Left') : (t('compare.oldDoc') || 'Old')}
                 </div>
                 <div
                   ref={oldPaneRef}
@@ -906,7 +912,7 @@ export default function CompareView() {
               </div>
               <div style="flex:1 1 50%; min-width:0; position:relative; display:flex;">
                 <div style="position:absolute; top:6px; left:8px; z-index:2; padding:2px 8px; background:rgba(40,40,40,0.85); color:#ddd; font-size:11px; pointer-events:none;">
-                  {t('compare.newDoc') || 'New'}
+                  {compareSplitOnly() ? (t('compare.rightPane') || 'Right') : (t('compare.newDoc') || 'New')}
                 </div>
                 <div
                   ref={newPaneRef}
@@ -935,13 +941,17 @@ export default function CompareView() {
               </div>
             </Show>
           </div>
-          <ChangeListPanel
-            t={t}
-            changes={allChanges}
-            onFocus={focusOnChange}
-            focused={compareFocusedChange}
-            onTextFocus={gotoTextChange}
-          />
+          {/* Gesplitste weergave vergelijkt niets, dus is er ook niets te
+              tonen; de volle breedte gaat naar de twee tekeningen. */}
+          <Show when={!compareSplitOnly()}>
+            <ChangeListPanel
+              t={t}
+              changes={allChanges}
+              onFocus={focusOnChange}
+              focused={compareFocusedChange}
+              onTextFocus={gotoTextChange}
+            />
+          </Show>
         </div>
       </div>
     </Show>
