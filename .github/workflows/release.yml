@@ -9,7 +9,7 @@ on:
       version:
         description: 'Version tag (e.g., v1.0.0)'
         required: true
-        default: 'v2.1.0'
+        default: 'v2.4.1'
 
 jobs:
   create-release:
@@ -127,7 +127,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Install Rust targets (macOS universal)
-        if: matrix.target == 'macos'
+        if: matrix.target == 'macos' && env.ONDERTEKENEN_MAC == 'true'
         run: rustup target add aarch64-apple-darwin x86_64-apple-darwin
 
       - name: Install dependencies (Ubuntu only)
@@ -228,7 +228,7 @@ jobs:
           cp /tmp/lib/libpdfium.so src-tauri/binaries/linux-x64/libpdfium.so
 
       - name: Build pdfium-worker sidecar (macOS universal)
-        if: matrix.target == 'macos'
+        if: matrix.target == 'macos' && env.ONDERTEKENEN_MAC == 'true'
         working-directory: .
         run: |
           cargo build --release -p pdfium-worker --target aarch64-apple-darwin
@@ -248,7 +248,7 @@ jobs:
       # .so en de win-x64 pdfium.dll), met SHA-256-verificatie zodat een
       # gewijzigde upstream-asset de build laat falen i.p.v. stil door te gaan.
       - name: Prepare libpdfium.dylib (macOS)
-        if: matrix.target == 'macos'
+        if: matrix.target == 'macos' && env.ONDERTEKENEN_MAC == 'true'
         run: npm run prepare:native-runtime
 
       # Onderteken de dylib VÓÓR het bundelen. Tauri ondertekent de app-binary
@@ -308,7 +308,7 @@ jobs:
           }
 
       - name: Write App Store Connect API key (macOS)
-        if: matrix.target == 'macos'
+        if: matrix.target == 'macos' && env.ONDERTEKENEN_MAC == 'true'
         shell: bash
         run: |
           printf '%s' "${{ secrets.APPLE_API_KEY_CONTENT }}" > "${{ runner.temp }}/apple-api-key.p8"
@@ -348,11 +348,11 @@ jobs:
       # the external notarization service can be retried without rebuilding
       # both macOS architectures.
       - name: Build macOS app without bundles
-        if: matrix.target == 'macos'
+        if: matrix.target == 'macos' && env.ONDERTEKENEN_MAC == 'true'
         run: npm run tauri -- build --target universal-apple-darwin --no-bundle
 
       - name: Upload macOS release assets
-        if: matrix.target == 'macos'
+        if: matrix.target == 'macos' && env.ONDERTEKENEN_MAC == 'true'
         uses: tauri-apps/tauri-action@action-v0.6.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -375,7 +375,7 @@ jobs:
           includeUpdaterJson: ${{ env.UPDATER_SLEUTEL == 'true' }}
 
       - name: Verify macOS signature and notarization
-        if: matrix.target == 'macos'
+        if: matrix.target == 'macos' && env.ONDERTEKENEN_MAC == 'true'
         run: |
           set -euo pipefail
           DMG_PATH="$(find ../target/universal-apple-darwin/release/bundle/dmg -name '*.dmg' -print -quit)"
