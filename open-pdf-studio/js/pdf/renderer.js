@@ -150,6 +150,38 @@ function setupContinuousAnnotationCanvas(canvas, width, height) {
   return dpr;
 }
 
+// Dekt de huidige uitsnede het zichtbare deel van de pagina nog?
+//
+// De uitsnede wordt met CONT_ANN_MARGE_PX rondom aangelegd, maar hij werd bij
+// elke scroll-settle opnieuw berekend — en dat herschrijft canvas.width, wat de
+// backing store opnieuw toewijst en wist, gevolgd door een volledige
+// annotatie-hertekening. Tijdens het pannen gebeurde dat acht keer per seconde
+// per zichtbare pagina, ook als er geen enkele annotatie op stond. Zolang de
+// marge het beeld nog dekt, is er niets te doen: dát is waar de marge voor is.
+function _uitsnedeDektBeeld(canvas, cc) {
+  const container = document.getElementById('pdf-container');
+  if (!container) return false;
+  const ccr = cc.getBoundingClientRect();
+  if (!(ccr.width > 1 && ccr.height > 1)) return false;
+  const breedte = parseFloat(cc.style.width) || ccr.width;
+  const hoogte = parseFloat(cc.style.height) || ccr.height;
+  const cr = container.getBoundingClientRect();
+  const fx = breedte / ccr.width;
+  const fy = hoogte / ccr.height;
+  const zichtL = Math.max(0, (cr.left - ccr.left) * fx);
+  const zichtT = Math.max(0, (cr.top - ccr.top) * fy);
+  const zichtR = Math.min(breedte, (cr.right - ccr.left) * fx);
+  const zichtB = Math.min(hoogte, (cr.bottom - ccr.top) * fy);
+  if (!(zichtR > zichtL && zichtB > zichtT)) return false;
+  const x = parseFloat(canvas.style.left) || 0;
+  const y = parseFloat(canvas.style.top) || 0;
+  const w = parseFloat(canvas.style.width) || 0;
+  const h = parseFloat(canvas.style.height) || 0;
+  // Een minimale placeholder (pagina stond buiten beeld) dekt niets.
+  if (w <= 2 || h <= 2) return false;
+  return x <= zichtL && y <= zichtT && x + w >= zichtR && y + h >= zichtB;
+}
+
 // Herpositioneer + herteken het annotatiecanvas van een zichtbare pagina
 // (na zoom-/scroll-settle). Goedkoop: vector-hertekening op viewportformaat.
 function reclipContinuousAnnotationCanvas(wrapper, pageNum) {
@@ -157,6 +189,7 @@ function reclipContinuousAnnotationCanvas(wrapper, pageNum) {
   const cc = wrapper && wrapper.querySelector('.canvas-container-cont');
   const canvas = cc && cc.querySelector('.annotation-canvas');
   if (!doc || !cc || !canvas) return;
+  if (_uitsnedeDektBeeld(canvas, cc)) return;
   const breedte = parseFloat(cc.style.width) || cc.getBoundingClientRect().width;
   const hoogte = parseFloat(cc.style.height) || cc.getBoundingClientRect().height;
   setupContinuousAnnotationCanvas(canvas, breedte, hoogte);
@@ -1597,6 +1630,8 @@ function _bindContinuousScrollSync() {
   if (!container) return;
   _contScrollSyncBound = true;
   let pending = null;
+  let laatsteX = null;
+  let laatsteY = null;
   container.addEventListener('scroll', () => {
     const doc = getActiveDocument();
     // Facing toont één spread zonder scroll-navigatie; scroll mag currentPage
@@ -1606,7 +1641,16 @@ function _bindContinuousScrollSync() {
     if (pending) return;
     pending = setTimeout(() => {
       pending = null;
-      _syncCurrentPageFromScroll(container);
+      const x = container.scrollLeft;
+      const y = container.scrollTop;
+      if (x === laatsteX && y === laatsteY) return;
+      const verticaalVerschoven = laatsteY === null || y !== laatsteY;
+      laatsteX = x;
+      laatsteY = y;
+      // Welke pagina in het midden staat kan alleen door VERTICAAL scrollen
+      // veranderen. Bij horizontaal pannen scheelt deze poort een rect-meting
+      // over alle pagina's, acht keer per seconde.
+      if (verticaalVerschoven) _syncCurrentPageFromScroll(container);
       // Annotatie-uitsnedes op de nieuwe scrollpositie zetten.
       reclipAllContinuousAnnotationCanvases();
     }, 120);
