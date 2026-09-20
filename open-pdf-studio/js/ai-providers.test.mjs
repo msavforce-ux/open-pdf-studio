@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   AANBIEDERS, VORMEN, aanbieder, bouwVerzoek, leesAntwoord,
   leesInstellingen, bewaarInstellingen, KEUZE_LS, SLEUTELS_LS, OUDE_ANTHROPIC_LS,
+  bouwModellenVerzoek, leesModellen,
 } from './ai-providers.js';
 
 const basis = { sleutel: 'K', model: 'M', messages: [{ role: 'user', content: 'hoi' }] };
@@ -192,4 +193,51 @@ test('custom bewaart ook zijn adres, en het geheel is meteen te versturen', () =
 
 test('een onbekende bewaarde aanbieder valt netjes terug', () => {
   assert.equal(leesInstellingen(nepOpslag({ [KEUZE_LS]: 'weggehaald' })).id, AANBIEDERS[0].id);
+});
+
+test('de modellenlijst wordt per vorm bij het juiste adres opgehaald', () => {
+  const a = bouwModellenVerzoek({ vorm: 'anthropic', basis: 'https://api.anthropic.com/', sleutel: 'K' });
+  assert.ok(a.url.startsWith('https://api.anthropic.com/v1/models'));
+  assert.equal(a.headers['x-api-key'], 'K');
+
+  const o = bouwModellenVerzoek({ vorm: 'openai', basis: 'https://api.groq.com/openai/v1', sleutel: 'K' });
+  assert.equal(o.url, 'https://api.groq.com/openai/v1/models');
+  assert.equal(o.headers.Authorization, 'Bearer K');
+
+  const g = bouwModellenVerzoek({ vorm: 'gemini', basis: 'https://x/v1beta', sleutel: 'A B' });
+  assert.ok(g.url.includes('key=A%20B'), 'de sleutel hoort in de URL, netjes gecodeerd');
+});
+
+test('zonder sleutel of adres wordt er geen lijst opgevraagd', () => {
+  assert.equal(bouwModellenVerzoek({ vorm: 'openai', basis: 'https://x/v1', sleutel: '' }), null);
+  assert.equal(bouwModellenVerzoek({ vorm: 'openai', basis: '', sleutel: 'K' }), null);
+});
+
+test('leesModellen begrijpt alle drie de antwoordvormen', () => {
+  assert.deepEqual(
+    leesModellen('openai', { data: [{ id: 'b' }, { id: 'a' }, { id: 'b' }] }),
+    ['a', 'b'],
+    'gesorteerd en zonder dubbelen'
+  );
+  assert.deepEqual(leesModellen('anthropic', { data: [{ id: 'claude-sonnet-5' }] }), ['claude-sonnet-5']);
+  assert.deepEqual(
+    leesModellen('gemini', { models: [{ name: 'models/gemini-2.0-flash' }, { name: 'gemini-pro' }] }),
+    ['gemini-2.0-flash', 'gemini-pro'],
+    'het voorvoegsel models/ hoort er niet bij'
+  );
+});
+
+test('leesModellen valt niet over rommel', () => {
+  for (const vorm of VORMEN) {
+    assert.deepEqual(leesModellen(vorm, null), []);
+    assert.deepEqual(leesModellen(vorm, {}), []);
+    assert.deepEqual(leesModellen(vorm, { error: { message: 'mis' } }), []);
+  }
+  assert.deepEqual(leesModellen('openai', { data: [{}, { id: '' }] }), []);
+});
+
+test('het Groq-standaardmodel is er een die Groq nog kent', () => {
+  // llama-3.3-70b-versatile is op 16-08-2026 afgevoerd: een 404 die eruitziet
+  // als een sleutelprobleem.
+  assert.notEqual(aanbieder('groq').model, 'llama-3.3-70b-versatile');
 });

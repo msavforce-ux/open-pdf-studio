@@ -2447,6 +2447,31 @@ async fn ai_http_post(
     Ok(AiHttpAntwoord { status, body })
 }
 
+/// De modellenlijst van een AI-dienst ophalen. Zelfde reden als hierboven: in
+/// de webview komt dit antwoord niet binnen.
+#[tauri::command]
+async fn ai_http_get(
+    url: String,
+    headers: std::collections::HashMap<String, String>,
+) -> Result<AiHttpAntwoord, String> {
+    if !url.starts_with("https://") {
+        return Err("only https URLs are allowed".into());
+    }
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(60))
+        .tls_built_in_native_certs(true)
+        .build()
+        .map_err(|e| e.to_string())?;
+    let mut req = client.get(&url);
+    for (naam, waarde) in headers {
+        req = req.header(naam, waarde);
+    }
+    let res = req.send().await.map_err(|e| e.to_string())?;
+    let status = res.status().as_u16();
+    let body = res.text().await.map_err(|e| e.to_string())?;
+    Ok(AiHttpAntwoord { status, body })
+}
+
 /// Mobile entry point: tauri vereist een argumentloze functie; de desktop-
 /// varianten geven StartupOpts (mcp-server/poort) door via main.rs.
 #[cfg(mobile)]
@@ -2777,6 +2802,7 @@ pub fn run(opts: StartupOpts) {
         })
         .invoke_handler(tauri::generate_handler![
             ai_http_post,
+            ai_http_get,
             get_opened_file,
             save_session,
             load_session,

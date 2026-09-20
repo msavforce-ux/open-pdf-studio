@@ -9,8 +9,11 @@ import { registerAssistantSubmit, registerAssistantMessages, enqueueAssistantQue
 import { ASSISTANT_SKILLS, SKILLS_SYSTEM_PROMPT } from '../../assistant-skills.js';
 import { getActiveDocument } from '../../core/state.js';
 import { useTranslation } from '../../i18n/useTranslation.js';
-import { AANBIEDERS, bouwVerzoek, leesAntwoord, leesInstellingen, bewaarInstellingen } from '../../ai-providers.js';
-import { verstuur } from '../../ai-transport.js';
+import {
+  AANBIEDERS, bouwVerzoek, leesAntwoord, leesInstellingen, bewaarInstellingen,
+  bouwModellenVerzoek, leesModellen,
+} from '../../ai-providers.js';
+import { verstuur, haal } from '../../ai-transport.js';
 
 const GREETING =
   'Hello. I am the **OpenAEC assistant**. I can 🌐 translate, 📝 summarise, ✏️ draw on the drawing and 🚪 detect doors. Pick a skill below or just ask.';
@@ -62,6 +65,11 @@ export default function AssistantPanel() {
   // Wat er in de velden staat terwijl het formulier open is; pas bij Save gaat
   // het naar de opslag.
   const [concept, setConcept] = createSignal(leesInstellingen(opslag()));
+  // De modellenlijst van de gekozen dienst. Modelnamen zijn geen constanten —
+  // Groq voerde llama-3.3-70b-versatile af en de 404 die volgde las als een
+  // sleutelprobleem — dus je kunt de dienst zelf vragen wat hij vandaag kent.
+  const [modellen, setModellen] = createSignal([]);
+  const [modellenStand, setModellenStand] = createSignal('');
   let messagesEnd, inputEl;
 
   const activeDocName = () => getActiveDocument()?.fileName || null;
@@ -85,6 +93,30 @@ export default function AssistantPanel() {
     const nu = bewaarInstellingen(opslag(), { id });
     setConcept(nu);
     setAi(nu);
+    // De lijst hoorde bij de vorige dienst.
+    setModellen([]);
+    setModellenStand('');
+  }
+
+  async function haalModellen() {
+    const c = concept();
+    const verzoek = bouwModellenVerzoek({ vorm: c.vorm, basis: c.basis, sleutel: c.sleutel });
+    if (!verzoek) { setModellenStand('fill in a key first'); return; }
+    setModellenStand('loading…');
+    try {
+      const { status, data, tekst } = await haal(verzoek);
+      if (status < 200 || status >= 300) {
+        setModellenStand(`error ${status}`);
+        console.warn('[assistant] modellenlijst faalde:', tekst.slice(0, 200));
+        return;
+      }
+      const lijst = leesModellen(c.vorm, data);
+      setModellen(lijst);
+      setModellenStand(lijst.length ? `${lijst.length} models` : 'no models returned');
+    } catch (e) {
+      setModellenStand('could not reach provider');
+      console.warn('[assistant] modellenlijst faalde:', e?.message ?? e);
+    }
   }
 
   function saveKey() {
@@ -98,7 +130,11 @@ export default function AssistantPanel() {
   }
 
   function openKey() {
-    if (!showKey()) setConcept(leesInstellingen(opslag()));
+    if (!showKey()) {
+      setConcept(leesInstellingen(opslag()));
+      setModellen([]);
+      setModellenStand('');
+    }
     setShowKey(!showKey());
   }
 
@@ -242,10 +278,19 @@ export default function AssistantPanel() {
                 type="text"
                 class="chat-keyinput chat-keymodel"
                 placeholder="model"
+                list="chat-modellen"
                 value={concept().model}
                 onInput={(e) => setConcept({ ...concept(), model: e.currentTarget.value })}
                 onKeyDown={(e) => { if (e.key === 'Enter') saveKey(); }}
               />
+              <datalist id="chat-modellen">
+                <For each={modellen()}>{(m) => <option value={m} />}</For>
+              </datalist>
+              <button
+                class="chat-keylist"
+                title="Ask the provider which models it has"
+                onClick={haalModellen}
+              >↻</button>
               <Show when={concept().id === 'custom'}>
                 <input
                   type="text"
@@ -257,6 +302,9 @@ export default function AssistantPanel() {
                 />
               </Show>
               <button class="chat-keysave" onClick={saveKey}>{t('assistant.save') || 'Save'}</button>
+              <Show when={modellenStand()}>
+                <span class="chat-keystand">{modellenStand()}</span>
+              </Show>
             </div>
           </Show>
 

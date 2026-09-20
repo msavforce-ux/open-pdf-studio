@@ -21,8 +21,10 @@ export const AANBIEDERS = [
   { id: 'anthropic', label: 'Anthropic (Claude)', vorm: 'anthropic',
     basis: 'https://api.anthropic.com', model: 'claude-sonnet-5',
     sleutelHint: 'sk-ant-…' },
+  // llama-3.3-70b-versatile is op 16-08-2026 door Groq afgevoerd; wie hem nog
+  // aanroept krijgt een 404 die eruitziet als een sleutelprobleem.
   { id: 'groq', label: 'Groq', vorm: 'openai',
-    basis: 'https://api.groq.com/openai/v1', model: 'llama-3.3-70b-versatile',
+    basis: 'https://api.groq.com/openai/v1', model: 'openai/gpt-oss-120b',
     sleutelHint: 'gsk_…' },
   { id: 'openrouter', label: 'OpenRouter', vorm: 'openai',
     basis: 'https://openrouter.ai/api/v1', model: 'meta-llama/llama-3.3-70b-instruct:free',
@@ -197,4 +199,52 @@ export function bewaarInstellingen(opslag, { id, sleutel, model, basis } = {}) {
   if (model !== undefined) zet(MODELLEN_LS, model, a.model);
   if (basis !== undefined) zet(BASISSEN_LS, basis, a.basis);
   return leesInstellingen(opslag);
+}
+// ---------------------------------------------------------------------------
+// De modellenlijst. Modelnamen zijn geen constanten: Groq voerde
+// llama-3.3-70b-versatile af, en de 404 die je daarna kreeg las als een
+// sleutelprobleem. Elke dienst kan zelf vertellen wat hij vandaag aankan, dus
+// dat vragen we gewoon in plaats van het te raden.
+// ---------------------------------------------------------------------------
+
+/**
+ * Bouw het GET-verzoek voor de modellenlijst.
+ * @returns {null|{url:string, headers:object}}
+ */
+export function bouwModellenVerzoek({ vorm, basis, sleutel }) {
+  const url0 = schoon(basis);
+  const key = String(sleutel == null ? '' : sleutel).trim();
+  if (!url0 || !key) return null;
+
+  if (vorm === 'anthropic') {
+    return {
+      url: `${url0}/v1/models?limit=100`,
+      headers: {
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+    };
+  }
+  if (vorm === 'gemini') {
+    return {
+      url: `${url0}/models?pageSize=200&key=${encodeURIComponent(key)}`,
+      headers: {},
+    };
+  }
+  return { url: `${url0}/models`, headers: { Authorization: `Bearer ${key}` } };
+}
+
+/** Haal de modelnamen uit het antwoord; gesorteerd en zonder dubbelen. */
+export function leesModellen(vorm, data) {
+  if (!data) return [];
+  let rauw = [];
+  if (vorm === 'gemini') {
+    // Google geeft 'models/gemini-2.0-flash'; alleen het laatste stuk telt.
+    rauw = (data.models || []).map((m) => String(m?.name || '').replace(/^models\//, ''));
+  } else {
+    // Anthropic en de OpenAI-vorm zetten het allebei onder 'data'.
+    rauw = (data.data || []).map((m) => String(m?.id || ''));
+  }
+  return [...new Set(rauw.filter(Boolean))].sort();
 }

@@ -201,3 +201,16 @@
   cursor: pointer;
 }
 .chat-keyselect:focus { border-color: #d97706; }
+.chat-keylist {
+  border: 1px solid var(--theme-border, #d4d4d4);
+  background: var(--theme-bg, #fff);
+  color: var(--theme-text, #1e1e1e);
+  border-radius: 6px;
+  padding: 6px 9px;
+  font-size: 12px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.chat-keylist:hover { border-color: #d97706; }
+/* De uitkomst van het ophalen, op een eigen regel onder de velden. */
+.chat-keystand { flex: 1 1 100%; font-size: 11px; opacity: 0.7; }

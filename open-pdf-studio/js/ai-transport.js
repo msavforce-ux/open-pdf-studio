@@ -44,3 +44,27 @@ export async function verstuur(verzoek) {
   try { data = tekst ? JSON.parse(tekst) : null; } catch (_) { /* geen json */ }
   return { status, data, tekst };
 }
+
+/**
+ * Haal de modellenlijst op (GET). Zelfde route als verstuur(): via Rust als we
+ * in Tauri draaien, anders fetch.
+ * @returns {Promise<{status:number, data:any, tekst:string}>}
+ */
+export async function haal(verzoek) {
+  let status;
+  let tekst;
+
+  if (isTauri()) {
+    const res = await invoke('ai_http_get', { url: verzoek.url, headers: verzoek.headers });
+    status = Number(res?.status);
+    tekst = String(res?.body ?? '');
+  } else {
+    const res = await fetch(verzoek.url, { headers: verzoek.headers });
+    status = res.status;
+    tekst = await res.text().catch(() => '');
+  }
+
+  let data = null;
+  try { data = tekst ? JSON.parse(tekst) : null; } catch (_) { /* geen json */ }
+  return { status, data, tekst };
+}
