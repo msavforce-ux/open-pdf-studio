@@ -49,7 +49,11 @@
   user-select: none;
   overflow: hidden;
 }
-.tp-ext.tp-docked, .tp-ext.tp-float { background: #ffffff; }
+/* Extra paletten volgen het thema, net als de ingebouwde. Hier stond een
+   harde #ffffff: in een donker thema werd de achtergrond wit terwijl de
+   pictogrammen licht bleven (currentColor), en dan zie je een leeg wit
+   vlak met een titelbalk erboven. */
+.tp-ext.tp-docked, .tp-ext.tp-float { background: var(--theme-surface, #ffffff); }
 
 .tp-docked-tools {
   display: flex;

@@ -95,3 +95,27 @@ export const LINT_PALETTEN = [
     ],
   },
 ];
+
+/**
+ * Eenmalige verhuizing naar rechts.
+ *
+ * Deze paletten stonden in hun eerste uitgave links. Wie ze toen aanzette
+ * heeft "docked-left" in zijn voorkeuren staan, en die wint van een nieuwe
+ * standaard — dan verandert er niets en lijkt de wijziging niet te werken.
+ * Alleen wie ze nog links heeft staan verhuist mee; wie ze zelf ergens
+ * anders zette, houdt zijn keuze. Draait precies één keer.
+ */
+export function migreerLintPalettenNaarRechts(prefs, savePreferences) {
+  if (!prefs || prefs.lintPalettenRechts) return false;
+  let veranderd = false;
+  for (const p of LINT_PALETTEN) {
+    const sleutel = `ext_${p.id}_mode`;
+    if (prefs[sleutel] == null || prefs[sleutel] === 'docked-left') {
+      prefs[sleutel] = 'docked-right';
+      veranderd = true;
+    }
+  }
+  prefs.lintPalettenRechts = true;
+  savePreferences?.();
+  return veranderd;
+}

@@ -32,7 +32,7 @@ import { initSymbolPalette } from './solid/stores/symbolStore.js';
 import { initLeftPanelSide, migreerMeetIndeling } from './solid/stores/leftPanelStore.js';
 import { initScheduleDock } from './solid/stores/scheduleStore.js';
 import { koppelVerwijzingKlik } from './solid/stores/verwijzingStore.js';
-import { LINT_PALETTEN } from './solid/data/lintPaletten.js';
+import { LINT_PALETTEN, migreerLintPalettenNaarRechts } from './solid/data/lintPaletten.js';
 import { registerToolPalette } from './plugins/palette-registry.js';
 import { initSteelCatalogs } from './symbols/steel-catalog-store.js';
 import { initLineworkCatalogs } from './symbols/linework-catalog-store.js';
@@ -248,6 +248,7 @@ async function init() {
   koppelVerwijzingKlik();
   // Lintgroepen als losse paletten aanbieden: het paletsysteem regelt
   // vervolgens zelf het slepen, zweven, dokken en onthouden.
+  migreerLintPalettenNaarRechts(state.preferences, savePreferences);
   for (const p of LINT_PALETTEN) registerToolPalette(p);
 
   // Re-register downloaded parametric steel catalogs from preferences so the
