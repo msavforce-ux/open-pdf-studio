@@ -6,7 +6,7 @@
 //   2. MCP relay   -> an external MCP client answers via the app server
 import { createSignal, For, Show, createEffect } from 'solid-js';
 import { registerAssistantSubmit, registerAssistantMessages, enqueueAssistantQuestion, relayClientActive } from '../../assistant-mcp-relay.js';
-import { ASSISTANT_SKILLS, SKILLS_SYSTEM_PROMPT } from '../../assistant-skills.js';
+import { ASSISTANT_SKILLS, SKILLS_SYSTEM_PROMPT, DIRECT_SYSTEM_PROMPT } from '../../assistant-skills.js';
 import { getActiveDocument } from '../../core/state.js';
 import { useTranslation } from '../../i18n/useTranslation.js';
 import {
@@ -14,6 +14,7 @@ import {
   bouwModellenVerzoek, leesModellen,
 } from '../../ai-providers.js';
 import { verstuur, haal } from '../../ai-transport.js';
+import { leesPaginaContext } from '../../ai-paginatekst.js';
 
 const GREETING =
   'Hello. I am the **OpenAEC assistant**. I can 🌐 translate, 📝 summarise, ✏️ draw on the drawing and 🚪 detect doors. Pick a skill below or just ask.';
@@ -79,8 +80,21 @@ export default function AssistantPanel() {
     queueMicrotask(() => messagesEnd?.scrollIntoView({ behavior: 'smooth' }));
   });
 
+  const BASIS_PROMPT = 'You are the OpenAEC assistant inside Open PDF Studio (a PDF annotation '
+    + 'editor). Help the user with questions about the open PDF document and with general tasks.\n\n';
+
+  /** Voor de relay: daar voert een cliënt het gereedschap echt uit. */
   function systemPrompt() {
-    return 'You are the OpenAEC assistant inside Open PDF Studio (a PDF annotation editor). Help the user with questions about the open PDF document and with general tasks.\n\n' + SKILLS_SYSTEM_PROMPT;
+    return BASIS_PROMPT + SKILLS_SYSTEM_PROMPT;
+  }
+
+  /**
+   * Voor een eigen sleutel: geen gereedschap, maar wel de tekst van de pagina
+   * waar de gebruiker naar kijkt. Anders weet het model niets van het document
+   * en is elke vraag erover een slag in de lucht.
+   */
+  async function directPrompt() {
+    return BASIS_PROMPT + DIRECT_SYSTEM_PROMPT + await leesPaginaContext(getActiveDocument());
   }
 
   // Van aanbieder wisselen laat het formulier meteen de sleutel, het model en
@@ -155,7 +169,7 @@ export default function AssistantPanel() {
         basis: instel.basis,
         sleutel: instel.sleutel,
         model: instel.model,
-        system: systemPrompt(),
+        system: await directPrompt(),
         messages: msgs,
       });
       if (!verzoek) throw new Error('incomplete provider settings');

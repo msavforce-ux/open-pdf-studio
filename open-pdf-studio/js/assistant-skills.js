@@ -50,6 +50,22 @@ export const ASSISTANT_SKILLS = [
   },
 ];
 
+// Voor een eigen API-sleutel: er gaat GEEN gereedschap mee met zo'n aanroep,
+// dus het model mag er ook niet naar grijpen. gpt-oss-120b deed dat wel — het
+// riep app_fit_page aan omdat de opdracht hieronder dat gereedschap noemt — en
+// Groq keurde het antwoord af met "Tool choice is none, but model called a
+// tool". Een 400 op een vraag die niets met gereedschap te maken had.
+export const DIRECT_SYSTEM_PROMPT =
+  'You answer as text only. You have NO tools and NO function calling available in this mode: '
+  + 'never emit a tool call, a function call or JSON pretending to be one — it will be rejected by the API.\n'
+  + 'You can read the text of the page the user has open (given below when there is one) and answer '
+  + 'questions about it.\n'
+  + 'You CANNOT see the drawing as an image, and you cannot draw, mark or change anything in the '
+  + 'document. If the user asks you to draw or mark something, say plainly that this needs the MCP '
+  + 'connection (Claude Code or Claude Desktop) and that an API key alone cannot do it.\n'
+  + 'Answer in the language the user writes in, briefly and practically.';
+
+// Voor de MCP-relay: daar zit een cliënt achter die het gereedschap wél heeft.
 export const SKILLS_SYSTEM_PROMPT =
   'You have a skill set and can perform ACTIONS on the open PDF document through the app\'s MCP tools:\n' +
   '- Translating / summarising: use app_screenshot_view (width 2000) to look at and read the page; return the result as text.\n' +
