@@ -159,7 +159,7 @@
 .chat-send:hover { background: #b45309; }
 .chat-send:disabled { background: var(--theme-border, #d4d4d4); cursor: not-allowed; }
 
-/* Claude (Anthropic) API-key row — toggled via the key button in the header. */
+/* AI provider + API-key row — toggled via the key button in the header. */
 .chat-keyrow { display: flex; gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--theme-border, #d4d4d4); background: var(--theme-surface, #f5f5f5); }
 .chat-keyinput {
   flex: 1;
@@ -174,3 +174,30 @@
 .chat-keyinput:focus { border-color: #d97706; }
 .chat-keysave { border: none; background: #d97706; color: #fff; border-radius: 6px; padding: 6px 12px; font-size: 12px; cursor: pointer; flex-shrink: 0; }
 .chat-keysave:hover { background: #b45309; }
+/* Vier velden naast elkaar wordt te smal in een paneel van 360px, dus ze
+   mogen doorlopen op een volgende regel. */
+.chat-keyrow-wrap { flex-wrap: wrap; }
+.chat-keyrow-wrap .chat-keyinput { min-width: 120px; }
+.chat-keymodel { flex: 0 1 140px; }
+.chat-keyselect {
+  flex: 1 1 100%;
+  /* Zonder dit tekent WebKitGTK een systeemvakje: lichte achtergrond met
+     donkere letters, midden in een donker paneel. Eigen pijltje erbij, want
+     appearance:none haalt ook dat weg. */
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%23888' d='M0 0h10L5 6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 9px;
+  padding-right: 24px;
+  border: 1px solid var(--theme-border, #d4d4d4);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12px;
+  background: var(--theme-bg, #fff);
+  color: var(--theme-text, #1e1e1e);
+  outline: none;
+  cursor: pointer;
+}
+.chat-keyselect:focus { border-color: #d97706; }

@@ -1850,24 +1850,36 @@ async function handleSetMeasureScale(params) {
   return { ok: true, measureScale: { pixelsPerUnit, unit } };
 }
 
-/** Ask the assistant's AI (Claude/Anthropic direct) — lets an MCP client test
- *  the assistant end-to-end without the chat UI. Uses the personal key set via
+/** Ask the assistant's AI directly — lets an MCP client test the assistant
+ *  end-to-end without the chat UI. Uses whichever provider and key are set via
  *  the 🔑 button. */
 async function handleAiComplete(params) {
   const prompt = params?.prompt;
   if (typeof prompt !== 'string' || !prompt) return { ok: false, error: 'missing params.prompt' };
-  let key = '';
-  try { key = localStorage.getItem('opds-anthropic-key') || ''; } catch { /* no localStorage */ }
-  // Claude (Anthropic) direct — uses the personal key set via the 🔑 button.
-  if (!key) return { ok: false, error: 'geen Claude-key gezet (🔑)' };
-  const r = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-    body: JSON.stringify({ model: 'claude-sonnet-5', max_tokens: 512, system: params?.system || undefined, messages: [{ role: 'user', content: prompt }] }),
+  const ai = await import('./ai-providers.js');
+  let opslag = null;
+  try { opslag = window.localStorage; } catch { /* no localStorage */ }
+  const instel = ai.leesInstellingen(opslag);
+  const verzoek = ai.bouwVerzoek({
+    vorm: instel.vorm,
+    basis: instel.basis,
+    sleutel: instel.sleutel,
+    model: instel.model,
+    maxTokens: 512,
+    system: params?.system || undefined,
+    messages: [{ role: 'user', content: prompt }],
   });
-  if (!r.ok) { const tx = await r.text().catch(() => ''); return { ok: false, error: `Claude API ${r.status}: ${tx.slice(0, 200)}` }; }
-  const data = await r.json();
-  return { ok: true, via: 'claude-direct', text: data?.content?.[0]?.text || '' };
+  if (!verzoek) return { ok: false, error: 'no AI provider configured (🔑)' };
+  const r = await fetch(verzoek.url, {
+    method: 'POST',
+    headers: verzoek.headers,
+    body: JSON.stringify(verzoek.body),
+  });
+  if (!r.ok) {
+    const tx = await r.text().catch(() => '');
+    return { ok: false, error: `${instel.label} API ${r.status}: ${tx.slice(0, 200)}` };
+  }
+  return { ok: true, via: instel.id, text: ai.leesAntwoord(instel.vorm, await r.json()) || '' };
 }
 
 /** Accounts sign-in state — deactivated (cloud accounts feature removed from

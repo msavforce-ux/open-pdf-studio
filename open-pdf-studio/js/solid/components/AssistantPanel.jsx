@@ -1,20 +1,19 @@
 // Assistant — floating chat panel (bottom-right) + launcher button. Two ways to
 // answer, tried in order:
-//   1. Claude (Anthropic) -> direct API with a locally stored API key
-//   2. MCP relay          -> an external MCP client answers via the app server
+//   1. AI provider -> direct API call with a locally stored API key. Anthropic,
+//      Groq, OpenRouter, NVIDIA, DeepSeek, Mistral, GitHub Models, OpenAI,
+//      Gemini or any other OpenAI-compatible service (see ai-providers.js).
+//   2. MCP relay   -> an external MCP client answers via the app server
 import { createSignal, For, Show, createEffect } from 'solid-js';
 import { registerAssistantSubmit, registerAssistantMessages, enqueueAssistantQuestion, relayClientActive } from '../../assistant-mcp-relay.js';
 import { ASSISTANT_SKILLS, SKILLS_SYSTEM_PROMPT } from '../../assistant-skills.js';
 import { getActiveDocument } from '../../core/state.js';
 import { useTranslation } from '../../i18n/useTranslation.js';
+import { AANBIEDERS, bouwVerzoek, leesAntwoord, leesInstellingen, bewaarInstellingen } from '../../ai-providers.js';
 
 const GREETING =
   'Hello. I am the **OpenAEC assistant**. I can 🌐 translate, 📝 summarise, ✏️ draw on the drawing and 🚪 detect doors. Pick a skill below or just ask.';
-const ANTHROPIC_KEY_LS = 'opds-anthropic-key';
-// Het actuele Sonnet-model. Stond op 'claude-sonnet-4-6'; een model dat de
-// API niet kent geeft een 404 die in het paneel als "de Claude-API gaf een
-// fout" verschijnt — onmogelijk te herleiden tot een verouderde modelnaam.
-const CLAUDE_MODEL = 'claude-sonnet-5';
+const opslag = () => { try { return window.localStorage; } catch (_) { return null; } };
 
 // Minimal markdown-lite rendering (bold, inline code, line breaks). The AI text
 // is HTML-escaped first so it can never inject markup.
@@ -31,11 +30,17 @@ function renderContent(text) {
 
 function describeAiError(err) {
   const raw = String(err?.message ?? err ?? '').trim();
-  if (/Claude API 401|invalid x-api-key|authentication_error/i.test(raw)) {
-    return '⚠️ Invalid Claude (Anthropic) API key. Check it with the 🔑 button at the top right of this panel.';
+  if (/\b40[13]\b|invalid x-api-key|authentication_error|invalid_api_key|unauthorized/i.test(raw)) {
+    return '⚠️ The API key was rejected. Check the provider and the key with the 🔑 button at the top right of this panel.';
   }
-  if (/Claude API 4\d\d|Claude API 5\d\d/i.test(raw)) {
-    return `⚠️ The Claude API returned an error.\n\n_Detail: ${raw}_`;
+  if (/\b404\b|model_not_found|does not exist/i.test(raw)) {
+    return `⚠️ This provider does not know that model name. Change it with the 🔑 button.\n\n_Detail: ${raw}_`;
+  }
+  if (/\b429\b|rate.?limit|quota/i.test(raw)) {
+    return '⚠️ Rate limit reached at this provider. Wait a moment, or switch provider with the 🔑 button.';
+  }
+  if (/API \d\d\d/i.test(raw)) {
+    return `⚠️ The AI service returned an error.\n\n_Detail: ${raw}_`;
   }
   if (/onbereikbaar|connection|econn|refused|failed to connect|timed out|failed to fetch/i.test(raw)) {
     return '⚠️ Could not reach the AI service.';
@@ -49,10 +54,12 @@ export default function AssistantPanel() {
   const [messages, setMessages] = createSignal([{ role: 'assistant', content: GREETING }]);
   const [input, setInput] = createSignal('');
   const [loading, setLoading] = createSignal(false);
-  const readKey = () => { try { return localStorage.getItem(ANTHROPIC_KEY_LS) || ''; } catch (_) { return ''; } };
-  const [apiKey, setApiKey] = createSignal(readKey());
+  const [ai, setAi] = createSignal(leesInstellingen(opslag()));
   const [showKey, setShowKey] = createSignal(false);
-  let messagesEnd, inputEl, keyEl;
+  // Wat er in de velden staat terwijl het formulier open is; pas bij Save gaat
+  // het naar de opslag.
+  const [concept, setConcept] = createSignal(leesInstellingen(opslag()));
+  let messagesEnd, inputEl;
 
   const activeDocName = () => getActiveDocument()?.fileName || null;
 
@@ -65,44 +72,64 @@ export default function AssistantPanel() {
     return 'You are the OpenAEC assistant inside Open PDF Studio (a PDF annotation editor). Help the user with questions about the open PDF document and with general tasks.\n\n' + SKILLS_SYSTEM_PROMPT;
   }
 
+  // Van aanbieder wisselen laat het formulier meteen de sleutel, het model en
+  // het adres van díe aanbieder zien — bewaard of standaard.
+  function kiesAanbieder(id) {
+    const vorige = concept();
+    bewaarInstellingen(opslag(), {
+      id: vorige.id, sleutel: vorige.sleutel, model: vorige.model, basis: vorige.basis,
+    });
+    const nu = bewaarInstellingen(opslag(), { id });
+    setConcept(nu);
+    setAi(nu);
+  }
+
   function saveKey() {
-    const v = (keyEl?.value || '').trim();
-    try {
-      if (v) localStorage.setItem(ANTHROPIC_KEY_LS, v);
-      else localStorage.removeItem(ANTHROPIC_KEY_LS);
-    } catch (_) { /* private mode — ignore */ }
-    setApiKey(v);
+    const c = concept();
+    const nu = bewaarInstellingen(opslag(), {
+      id: c.id, sleutel: c.sleutel, model: c.model, basis: c.basis,
+    });
+    setAi(nu);
+    setConcept(nu);
     setShowKey(false);
+  }
+
+  function openKey() {
+    if (!showKey()) setConcept(leesInstellingen(opslag()));
+    setShowKey(!showKey());
   }
 
   async function send(explicitText) {
     const text = (typeof explicitText === 'string' ? explicitText : input()).trim();
     if (!text || loading()) return;
-    const key = apiKey();
+    const instel = ai();
 
     setMessages((m) => [...m, { role: 'user', content: text }]);
     setInput('');
     setLoading(true);
-    // Claude (Anthropic) direct call — the default when a personal Anthropic key
-    // is set via the 🔑 button.
-    const claudeDirect = async () => {
+    // Direct API call to the chosen provider — the default once a key is set
+    // via the 🔑 button.
+    const directeAanroep = async () => {
       const msgs = messages().slice(1).map((m) => ({ role: m.role, content: m.content }));
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      const verzoek = bouwVerzoek({
+        vorm: instel.vorm,
+        basis: instel.basis,
+        sleutel: instel.sleutel,
+        model: instel.model,
+        system: systemPrompt(),
+        messages: msgs,
+      });
+      if (!verzoek) throw new Error('incomplete provider settings');
+      const res = await fetch(verzoek.url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': key,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true',
-        },
-        body: JSON.stringify({ model: CLAUDE_MODEL, max_tokens: 1024, system: systemPrompt(), messages: msgs }),
+        headers: verzoek.headers,
+        body: JSON.stringify(verzoek.body),
       });
       if (!res.ok) {
         const tx = await res.text().catch(() => '');
-        throw new Error(`Claude API ${res.status}: ${tx.slice(0, 200)}`);
+        throw new Error(`${instel.label} API ${res.status}: ${tx.slice(0, 200)}`);
       }
-      const data = await res.json();
-      return data?.content?.[0]?.text || 'No answer received.';
+      return leesAntwoord(instel.vorm, await res.json()) || 'No answer received.';
     };
 
     // MCP relay — an external MCP client (e.g. Claude Code, with working Claude
@@ -119,11 +146,11 @@ export default function AssistantPanel() {
 
     // Provider order. When a Claude Code/Desktop MCP client is connected (it
     // polled recently), route to the relay FIRST so it answers instantly — no
-    // Anthropic API, no key. Otherwise: Claude key -> relay (fallback).
+    // API, no key. Otherwise: own key -> relay (fallback).
     const relayActive = relayClientActive();
     const providers = [];
     if (relayActive) providers.push(mcpRelay);
-    if (key) providers.push(claudeDirect);
+    if (instel.sleutel) providers.push(directeAanroep);
     if (!relayActive) providers.push(mcpRelay);
 
     let answer = null;
@@ -155,8 +182,8 @@ export default function AssistantPanel() {
   }
 
   // Subtitle shows the active provider so the user knows where answers come from.
-  const providerLabel = () => (apiKey()
-    ? (t('assistant.connected') || 'via Claude')
+  const providerLabel = () => (ai().sleutel
+    ? `via ${ai().label}`
     : (t('assistant.notConnected') || 'not connected'));
 
   return (
@@ -177,20 +204,45 @@ export default function AssistantPanel() {
                   : providerLabel()}
               </span>
             </div>
-            <button class="chat-close" title={t('assistant.setKey') || 'Set Claude (Anthropic) API key'} onClick={() => setShowKey(!showKey())}>🔑</button>
+            <button class="chat-close" title={t('assistant.setKey') || 'AI provider and API key'} onClick={openKey}>🔑</button>
             <button class="chat-close" title={t('close') || 'Close'} onClick={() => setOpen(false)}>✕</button>
           </div>
 
           <Show when={showKey()}>
-            <div class="chat-keyrow">
+            <div class="chat-keyrow chat-keyrow-wrap">
+              <select
+                class="chat-keyselect"
+                value={concept().id}
+                onChange={(e) => kiesAanbieder(e.currentTarget.value)}
+              >
+                <For each={AANBIEDERS}>{(a) => <option value={a.id}>{a.label}</option>}</For>
+              </select>
               <input
-                ref={keyEl}
                 type="password"
                 class="chat-keyinput"
-                placeholder={t('assistant.keyPlaceholder') || 'Claude (Anthropic) API key — sk-ant-…'}
-                value={apiKey()}
+                placeholder={`API key — ${concept().sleutelHint || '…'}`}
+                value={concept().sleutel}
+                onInput={(e) => setConcept({ ...concept(), sleutel: e.currentTarget.value })}
                 onKeyDown={(e) => { if (e.key === 'Enter') saveKey(); }}
               />
+              <input
+                type="text"
+                class="chat-keyinput chat-keymodel"
+                placeholder="model"
+                value={concept().model}
+                onInput={(e) => setConcept({ ...concept(), model: e.currentTarget.value })}
+                onKeyDown={(e) => { if (e.key === 'Enter') saveKey(); }}
+              />
+              <Show when={concept().id === 'custom'}>
+                <input
+                  type="text"
+                  class="chat-keyinput"
+                  placeholder="https://… /v1"
+                  value={concept().basis}
+                  onInput={(e) => setConcept({ ...concept(), basis: e.currentTarget.value })}
+                  onKeyDown={(e) => { if (e.key === 'Enter') saveKey(); }}
+                />
+              </Show>
               <button class="chat-keysave" onClick={saveKey}>{t('assistant.save') || 'Save'}</button>
             </div>
           </Show>
