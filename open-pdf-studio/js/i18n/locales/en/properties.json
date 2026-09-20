@@ -608,7 +608,8 @@
     "dock": "Dock at the bottom",
     "undock": "Float",
     "renameGroup": "Rename — applies to every measurement in this group",
-    "dragHeight": "Drag to resize"
+    "dragHeight": "Drag to resize",
+    "goToMarkup": "Click to show on the drawing"
   },
   "parametricSymbol": {
     "defaultTitle": "Parametric symbol",

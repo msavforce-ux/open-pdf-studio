@@ -479,7 +479,12 @@ export function storeShowProperties(annotation) {
   setCustomPanelRender(customRenderer ? () => customRenderer : null);
 
   setPanelMode('annotation');
-  setPanelVisible(true);
+  // Alleen openklappen als de gebruiker het paneel niet zelf heeft
+  // weggezet. Wie het dichtdoet en daarna iets aanklikt, kreeg het bij elke
+  // selectie opnieuw in beeld — dan is dichtdoen geen keuze maar een
+  // handeling die je blijft herhalen. De inhoud wordt hierboven wél
+  // bijgewerkt, dus openen laat meteen het juiste zien.
+  if (state.preferences?.propertiesPanelVisible !== false) setPanelVisible(true);
 }
 
 // Hide properties (deselect annotation, show doc info)

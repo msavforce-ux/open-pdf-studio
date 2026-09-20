@@ -608,7 +608,8 @@
     "dock": "Onderin vastzetten",
     "undock": "Los venster",
     "renameGroup": "Hernoemen — geldt voor elke meting in deze groep",
-    "dragHeight": "Sleep om de hoogte te wijzigen"
+    "dragHeight": "Sleep om de hoogte te wijzigen",
+    "goToMarkup": "Klik om op de tekening te tonen"
   },
   "parametricSymbol": {
     "defaultTitle": "Parametric symbol",

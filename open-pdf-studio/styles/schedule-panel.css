@@ -404,3 +404,12 @@
 .schedule-gedockt.is-leeg .schedule-footer {
   display: none;
 }
+
+/* Een regel in de staat wijst naar een markering op de tekening. */
+.schedule-table tr.q-rij {
+  cursor: pointer;
+}
+
+.schedule-table tr.q-rij:hover td {
+  background: var(--theme-panel-tab-hover, rgba(224, 138, 60, 0.18));
+}

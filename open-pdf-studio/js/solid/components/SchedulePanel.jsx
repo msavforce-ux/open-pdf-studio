@@ -16,6 +16,9 @@ import {
 import { scheduleHoogte, setScheduleHoogte } from '../stores/scheduleStore.js';
 import QuantitiesProperties from './QuantitiesProperties.jsx';
 import { hernoemMetingen, elementenVanGroep } from '../../annotations/groep-hernoemen.js';
+import { sprongNaar } from '../../annotations/naar-markering.js';
+import { goToPage } from '../../pdf/renderer.js';
+import { showProperties } from '../../ui/panels/properties-panel.js';
 
 function formatCell(val, col) {
   if (val == null || val === '') return '';
@@ -145,6 +148,26 @@ export default function SchedulePanel() {
   const leeg = () => (scheduleResult()?.count || 0) === 0;
   const hoogte = () => (scheduleDocked() && leeg() ? null : scheduleHoogte());
 
+  /**
+   * Van een regel naar de markering op de tekening. Zonder deze stap is de
+   * staat een dood overzicht: je ziet 340 m² en mag zelf gaan zoeken wélke
+   * vlakken dat waren.
+   */
+  function gaNaarMarkering(el) {
+    const doc = getActiveDocument();
+    if (!doc || !el) return;
+    const sprong = sprongNaar(el, doc.currentPage);
+    if (!sprong) return;
+    if (sprong.wisselPagina) goToPage(sprong.page);
+    doc.selectedAnnotations = [el];
+    doc.selectedAnnotation = el;
+    showProperties(el);
+    import('../../annotations/rendering.js').then((m) => {
+      if (doc.viewMode === 'continuous') m.redrawContinuous?.();
+      else m.redrawAnnotations?.();
+    });
+  }
+
   function placeOnPdf() {
     const doc = getActiveDocument();
     if (!doc) return;
@@ -238,7 +261,9 @@ export default function SchedulePanel() {
                       <Show when={scheduleResult().itemize}>
                         <For each={group.rows}>
                           {(row, i) => (
-                            <tr classList={{ 'q-stripe': appearance().stripe && i() % 2 === 1 }}>
+                            <tr class="q-rij" classList={{ 'q-stripe': appearance().stripe && i() % 2 === 1 }}
+                              title={t('quantities.goToMarkup') || 'Click to show on the drawing'}
+                              onClick={() => gaNaarMarkering(row.el)}>
                               <For each={scheduleResult().columns}>
                                 {(col) => (
                                   <td class={col.align === 'right' ? 'schedule-val' : ''}>

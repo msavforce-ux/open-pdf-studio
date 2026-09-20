@@ -33,7 +33,7 @@ export const LINT_PALETTEN = [
     translationKey: 'drawing.selection',
     icon: selectCommentsIcon,
     defaultVisible: false,
-    defaultMode: 'docked-left',
+    defaultMode: 'docked-right',
     tools: [
       G('lp-select', 'select', 'Select', selectCommentsIcon),
       G('lp-hand', 'hand', 'Hand', handIcon),
@@ -45,7 +45,7 @@ export const LINT_PALETTEN = [
     translationKey: 'drawing.draw',
     icon: drawIcon,
     defaultVisible: false,
-    defaultMode: 'docked-left',
+    defaultMode: 'docked-right',
     tools: [
       G('lp-line', 'line', 'Line', lineIcon),
       G('lp-arrow', 'arrow', 'Arrow', arrowIcon),
@@ -67,13 +67,19 @@ export const LINT_PALETTEN = [
     translationKey: 'drawing.annotate',
     icon: measureDistanceIcon,
     defaultVisible: false,
-    defaultMode: 'docked-left',
+    defaultMode: 'docked-right',
+    // Dezelfde inhoud als de lintgroep ANNOTATE, plus tellen: dat is wat er
+    // bij een takeoff werkelijk gebruikt wordt.
     tools: [
-      G('lp-mdist', 'measureDistance', 'Distance', measureDistanceIcon),
       G('lp-marea', 'measureArea', 'Area', measureAreaIcon),
+      G('lp-mdist', 'measureDistance', 'Length', measureDistanceIcon),
       G('lp-mperim', 'measurePerimeter', 'Perimeter', measurePerimeterIcon),
-      G('lp-mangle', 'measureAngle', 'Angle', measureAngleIcon),
-      G('lp-count', 'count', 'Count', selectCommentsIcon),
+      G('lp-mangle', 'measureAngle', 'Angular', measureAngleIcon),
+      G('lp-radius', 'radius', 'Radius', circleIcon),
+      G('lp-diameter', 'diameter', 'Diameter', ellipseIcon),
+      G('lp-callout2', 'callout', 'Leader', calloutIcon),
+      G('lp-cloud2', 'cloud', 'Cloud', cloudIcon),
+      G('lp-count', 'count', 'Count', rectIcon),
     ],
   },
   {
@@ -82,7 +88,7 @@ export const LINT_PALETTEN = [
     translationKey: 'measure.scaleGroup',
     icon: measurePerimeterIcon,
     defaultVisible: false,
-    defaultMode: 'docked-left',
+    defaultMode: 'docked-right',
     tools: [
       G('lp-scaleregion', 'scaleRegion', 'Scale region', measurePerimeterIcon),
       G('lp-calibrate', 'calibrate', 'Calibrate', measureDistanceIcon),
