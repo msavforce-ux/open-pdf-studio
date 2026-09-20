@@ -10,6 +10,7 @@ import { ASSISTANT_SKILLS, SKILLS_SYSTEM_PROMPT } from '../../assistant-skills.j
 import { getActiveDocument } from '../../core/state.js';
 import { useTranslation } from '../../i18n/useTranslation.js';
 import { AANBIEDERS, bouwVerzoek, leesAntwoord, leesInstellingen, bewaarInstellingen } from '../../ai-providers.js';
+import { verstuur } from '../../ai-transport.js';
 
 const GREETING =
   'Hello. I am the **OpenAEC assistant**. I can 🌐 translate, 📝 summarise, ✏️ draw on the drawing and 🚪 detect doors. Pick a skill below or just ask.';
@@ -42,8 +43,10 @@ function describeAiError(err) {
   if (/API \d\d\d/i.test(raw)) {
     return `⚠️ The AI service returned an error.\n\n_Detail: ${raw}_`;
   }
-  if (/onbereikbaar|connection|econn|refused|failed to connect|timed out|failed to fetch/i.test(raw)) {
-    return '⚠️ Could not reach the AI service.';
+  // 'error sending request' is hoe reqwest zegt dat het verzoek de deur niet
+  // uit kwam; 'load failed' is dezelfde melding uit de webview.
+  if (/connection|econn|refused|failed to connect|timed out|failed to fetch|load failed|error sending request|dns|tls|certificate/i.test(raw)) {
+    return `⚠️ Could not reach the AI service. Check your internet connection.\n\n_Detail: ${raw}_`;
   }
   return `⚠️ The AI call failed.\n\n_Detail: ${raw || 'unknown error'}_`;
 }
@@ -120,38 +123,48 @@ export default function AssistantPanel() {
         messages: msgs,
       });
       if (!verzoek) throw new Error('incomplete provider settings');
-      const res = await fetch(verzoek.url, {
-        method: 'POST',
-        headers: verzoek.headers,
-        body: JSON.stringify(verzoek.body),
-      });
-      if (!res.ok) {
-        const tx = await res.text().catch(() => '');
-        throw new Error(`${instel.label} API ${res.status}: ${tx.slice(0, 200)}`);
+      const { status, data, tekst } = await verstuur(verzoek);
+      if (status < 200 || status >= 300) {
+        throw new Error(`${instel.label} API ${status}: ${tekst.slice(0, 200)}`);
       }
-      return leesAntwoord(instel.vorm, await res.json()) || 'No answer received.';
+      return leesAntwoord(instel.vorm, data) || 'No answer received.';
     };
 
     // MCP relay — an external MCP client (e.g. Claude Code, with working Claude
     // auth) answers via the app's MCP server (app_assistant_pending/answer).
     // Final fallback so the assistant keeps working without a local key.
+    // Drie minuten is ruim voor een cliënt die echt luistert; de tien minuten
+    // die de relay standaard wacht zijn alleen maar stilte op het scherm.
     const mcpRelay = async () => {
       const history = messages().slice(1)
         .map((m) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
         .join('\n\n');
       const docName = activeDocName();
       const prompt = `${docName ? `Open document: ${docName}\n\n` : ''}${history}\n\nAssistant:`;
-      return await enqueueAssistantQuestion({ prompt, system: systemPrompt(), docName });
+      return await enqueueAssistantQuestion({ prompt, system: systemPrompt(), docName }, 180000);
     };
 
     // Provider order. When a Claude Code/Desktop MCP client is connected (it
     // polled recently), route to the relay FIRST so it answers instantly — no
-    // API, no key. Otherwise: own key -> relay (fallback).
+    // API, no key. Otherwise the own key does the work.
+    //
+    // De relay stond hier ook als achtervang áchter de eigen sleutel, en dat
+    // was precies verkeerd: zonder aangesloten cliënt wacht hij tien minuten
+    // op een antwoord dat nooit komt. Een afgekeurde sleutel leverde dus geen
+    // foutmelding maar tien minuten 'Thinking…' — het zag eruit alsof de
+    // assistent niets deed. Hij mag alleen nog als er echt iemand luistert.
     const relayActive = relayClientActive();
     const providers = [];
     if (relayActive) providers.push(mcpRelay);
     if (instel.sleutel) providers.push(directeAanroep);
-    if (!relayActive) providers.push(mcpRelay);
+
+    if (providers.length === 0) {
+      setMessages((m) => [...m, { role: 'assistant', content:
+        '⚠️ No AI provider set up yet. Press the 🔑 button at the top right of this panel, '
+        + 'pick a provider and paste its API key.' }]);
+      setLoading(false);
+      return;
+    }
 
     let answer = null;
     let lastErr = null;
@@ -256,7 +269,7 @@ export default function AssistantPanel() {
               )}
             </For>
             <Show when={loading()}>
-              <div class="chat-message chat-assistant"><div class="chat-bubble chat-typing">Denken…</div></div>
+              <div class="chat-message chat-assistant"><div class="chat-bubble chat-typing">Thinking…</div></div>
             </Show>
             <div ref={messagesEnd} />
           </div>

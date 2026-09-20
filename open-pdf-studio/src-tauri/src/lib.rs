@@ -2402,6 +2402,51 @@ fn set_prtscn_hotkey(_app: tauri::AppHandle, _enabled: bool) -> Result<(), Strin
     Ok(())
 }
 
+/// Antwoord van `ai_http_post`: de status hoort erbij, want een 401 van de
+/// aanbieder is een geldig antwoord dat het paneel zelf moet kunnen uitleggen.
+#[derive(serde::Serialize)]
+pub struct AiHttpAntwoord {
+    status: u16,
+    body: String,
+}
+
+/// HTTP-verzoek naar een AI-dienst, uitgevoerd in Rust in plaats van in de
+/// webview.
+///
+/// De webview draait op `tauri://localhost`, dus elke aanroep naar een
+/// AI-dienst is cross-origin. Anthropic staat dat uitdrukkelijk toe met een
+/// eigen header; Groq, OpenRouter, DeepSeek en de rest sturen geen
+/// CORS-header terug, en WebKit weigert het antwoord dan met niet meer dan
+/// "Load failed" — een sleutel die prima werkt lijkt zo kapot. Rust kent geen
+/// same-origin-regel, dus hier komt het antwoord gewoon binnen.
+#[tauri::command]
+async fn ai_http_post(
+    url: String,
+    headers: std::collections::HashMap<String, String>,
+    body: String,
+) -> Result<AiHttpAntwoord, String> {
+    // Alleen https: dit is geen algemene proxy voor de webview.
+    if !url.starts_with("https://") {
+        return Err("only https URLs are allowed".into());
+    }
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(120))
+        // Ook de wortels van het systeem: op een bedrijfsnetwerk dat TLS
+        // inspecteert is het certificaat van de proxy nergens anders te
+        // vinden, en zonder dit mislukt elke aanroep zonder uitleg.
+        .tls_built_in_native_certs(true)
+        .build()
+        .map_err(|e| e.to_string())?;
+    let mut req = client.post(&url).body(body);
+    for (naam, waarde) in headers {
+        req = req.header(naam, waarde);
+    }
+    let res = req.send().await.map_err(|e| e.to_string())?;
+    let status = res.status().as_u16();
+    let body = res.text().await.map_err(|e| e.to_string())?;
+    Ok(AiHttpAntwoord { status, body })
+}
+
 /// Mobile entry point: tauri vereist een argumentloze functie; de desktop-
 /// varianten geven StartupOpts (mcp-server/poort) door via main.rs.
 #[cfg(mobile)]
@@ -2731,6 +2776,7 @@ pub fn run(opts: StartupOpts) {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            ai_http_post,
             get_opened_file,
             save_session,
             load_session,

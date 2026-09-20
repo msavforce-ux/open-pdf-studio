@@ -165,8 +165,8 @@
     "connected": "via Claude",
     "notConnected": "not connected",
     "workingIn": "working in",
-    "setKey": "Set Claude (Anthropic) API key",
-    "keyPlaceholder": "Claude (Anthropic) API key — sk-ant-…",
+    "setKey": "AI provider and API key",
+    "keyPlaceholder": "API key",
     "save": "Save",
     "ask": "Ask something about this PDF…",
     "skill": {

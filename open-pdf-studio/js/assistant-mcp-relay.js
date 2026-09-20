@@ -24,7 +24,7 @@ export function registerAssistantMessages(fn) { _getMessages = fn; }
 
 /** app_assistant_ask — submit a message as if the user typed it in the window. */
 export function submitAssistantMessage(text) {
-  if (typeof _submit !== 'function') return { ok: false, error: 'assistent nog niet gereed' };
+  if (typeof _submit !== 'function') return { ok: false, error: 'assistant not ready yet' };
   _submit(String(text ?? ''));
   return { ok: true };
 }
@@ -44,7 +44,9 @@ export function enqueueAssistantQuestion({ prompt, system, docName } = {}, timeo
       _waiters.delete(id);
       const i = _queue.findIndex((q) => q.id === id);
       if (i >= 0) _queue.splice(i, 1);
-      reject(new Error('Geen MCP-client beantwoordde de vraag op tijd (time-out).'));
+      // Deze tekst komt in het chatvenster terecht, dus hij hoort in het
+      // Engels — de rest van het paneel is dat ook.
+      reject(new Error('No MCP client answered in time (timeout). Set your own API key with the 🔑 button.'));
     }, timeoutMs);
     _waiters.set(id, { resolve, reject, timer });
   });

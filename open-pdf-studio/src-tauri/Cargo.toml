@@ -1,6 +1,6 @@
 [package]
 name = "open-pdf-studio"
-version = "2.5.0"
+version = "2.6.0"
 description = "A free, open-source PDF annotation editor"
 authors = ["OpenAEC Foundation"]
 license = "LGPL-3.0-or-later"
@@ -42,7 +42,12 @@ tauri-plugin-store = "2"
 # Reads a bitmap off the system clipboard for the screenshot-annotate feature
 # (Windows PrtScn puts the capture on the clipboard). Cross-platform.
 tauri-plugin-clipboard-manager = "2"
-reqwest = { version = "0.12", features = ["rustls-tls", "json", "multipart"], default-features = false }
+# rustls-tls-native-roots erbij: met alleen de ingebouwde Mozilla-wortels
+# weigert elke aanroep op een bedrijfsnetwerk dat TLS inspecteert — en dat
+# doen ze bijna allemaal. De AI-assistent liep daar stuk op met niet meer dan
+# "error sending request". Met de wortels van het systeem erbij vertrouwt hij
+# ook het certificaat van de eigen proxy.
+reqwest = { version = "0.12", features = ["rustls-tls", "rustls-tls-native-roots", "json", "multipart"], default-features = false }
 open-pdf-render = { path = "../../open-pdf-render" }
 image = { version = "0.25", default-features = false, features = ["jpeg", "png"] }
 pdfium-render = { version = "0.9", features = ["thread_safe", "image_025"] }

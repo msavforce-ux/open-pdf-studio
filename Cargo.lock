@@ -2437,6 +2437,7 @@ dependencies = [
  "hyper",
  "hyper-util",
  "rustls",
+ "rustls-native-certs",
  "tokio",
  "tokio-rustls",
  "tower-service",
@@ -3615,7 +3616,7 @@ dependencies = [
 
 [[package]]
 name = "open-pdf-studio"
-version = "2.5.0"
+version = "2.6.0"
 dependencies = [
  "anyhow",
  "axum",
@@ -4557,6 +4558,7 @@ dependencies = [
  "pin-project-lite",
  "quinn",
  "rustls",
+ "rustls-native-certs",
  "rustls-pki-types",
  "serde",
  "serde_json",

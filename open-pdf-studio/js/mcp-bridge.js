@@ -1870,16 +1870,12 @@ async function handleAiComplete(params) {
     messages: [{ role: 'user', content: prompt }],
   });
   if (!verzoek) return { ok: false, error: 'no AI provider configured (🔑)' };
-  const r = await fetch(verzoek.url, {
-    method: 'POST',
-    headers: verzoek.headers,
-    body: JSON.stringify(verzoek.body),
-  });
-  if (!r.ok) {
-    const tx = await r.text().catch(() => '');
-    return { ok: false, error: `${instel.label} API ${r.status}: ${tx.slice(0, 200)}` };
+  const vervoer = await import('./ai-transport.js');
+  const { status, data, tekst } = await vervoer.verstuur(verzoek);
+  if (status < 200 || status >= 300) {
+    return { ok: false, error: `${instel.label} API ${status}: ${tekst.slice(0, 200)}` };
   }
-  return { ok: true, via: instel.id, text: ai.leesAntwoord(instel.vorm, await r.json()) || '' };
+  return { ok: true, via: instel.id, text: ai.leesAntwoord(instel.vorm, data) || '' };
 }
 
 /** Accounts sign-in state — deactivated (cloud accounts feature removed from
