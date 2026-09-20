@@ -9,7 +9,7 @@ import { getActiveDocument } from '../../core/state.js';
 import { useTranslation } from '../../i18n/useTranslation.js';
 
 const GREETING =
-  'Hallo! Ik ben de **OpenAEC-assistent**. Ik kan: 🌐 vertalen, 📝 samenvatten, ✏️ tekenen op de tekening, en 🚪 deuren herkennen. Kies hieronder een vaardigheid of stel je vraag.';
+  'Hello. I am the **OpenAEC assistant**. I can 🌐 translate, 📝 summarise, ✏️ draw on the drawing and 🚪 detect doors. Pick a skill below or just ask.';
 const ANTHROPIC_KEY_LS = 'opds-anthropic-key';
 const CLAUDE_MODEL = 'claude-sonnet-4-6';
 
@@ -29,7 +29,7 @@ function renderContent(text) {
 function describeAiError(err) {
   const raw = String(err?.message ?? err ?? '').trim();
   if (/Claude API 401|invalid x-api-key|authentication_error/i.test(raw)) {
-    return '⚠️ Ongeldige Claude (Anthropic) API-sleutel. Controleer de sleutel via het 🔑-knopje rechtsboven in het paneel.';
+    return '⚠️ Invalid Claude (Anthropic) API key. Check it with the 🔑 button at the top right of this panel.';
   }
   if (/Claude API 4\d\d|Claude API 5\d\d/i.test(raw)) {
     return `⚠️ De Claude-API gaf een fout.\n\n_Detail: ${raw}_`;
@@ -59,7 +59,7 @@ export default function AssistantPanel() {
   });
 
   function systemPrompt() {
-    return 'Je bent de OpenAEC-assistent in Open PDF Studio (een PDF-annotatie-editor). Help de gebruiker met vragen over het geopende PDF-document en algemene taken.\n\n' + SKILLS_SYSTEM_PROMPT;
+    return 'You are the OpenAEC assistant inside Open PDF Studio (a PDF annotation editor). Help the user with questions about the open PDF document and with general tasks.\n\n' + SKILLS_SYSTEM_PROMPT;
   }
 
   function saveKey() {
@@ -152,25 +152,29 @@ export default function AssistantPanel() {
   }
 
   // Subtitle shows the active provider so the user knows where answers come from.
-  const providerLabel = () => (apiKey() ? 'via Claude' : 'niet verbonden');
+  const providerLabel = () => (apiKey()
+    ? (t('assistant.connected') || 'via Claude')
+    : (t('assistant.notConnected') || 'not connected'));
 
   return (
     <Show
       when={open()}
       fallback={
-        <button class="chat-fab" title={t('assistantTitle') || 'OpenAEC-assistent'} onClick={() => setOpen(true)}>💬</button>
+        <button class="chat-fab" title={t('assistantTitle') || 'OpenAEC assistant'} onClick={() => setOpen(true)}>💬</button>
       }
     >
       <div class="chat-floating">
         <div class="chat-panel">
           <div class="chat-header">
             <div class="chat-header-titles">
-              <span class="chat-title">✨ OpenAEC-assistent</span>
+              <span class="chat-title">✨ {t('assistantTitle') || 'OpenAEC assistant'}</span>
               <span class="chat-subtitle" title={activeDocName() || ''}>
-                {activeDocName() ? `werkt in: ${activeDocName()} · ${providerLabel()}` : providerLabel()}
+                {activeDocName()
+                  ? `${t('assistant.workingIn') || 'working in'}: ${activeDocName()} · ${providerLabel()}`
+                  : providerLabel()}
               </span>
             </div>
-            <button class="chat-close" title="Claude (Anthropic) API-sleutel instellen" onClick={() => setShowKey(!showKey())}>🔑</button>
+            <button class="chat-close" title={t('assistant.setKey') || 'Set Claude (Anthropic) API key'} onClick={() => setShowKey(!showKey())}>🔑</button>
             <button class="chat-close" title={t('close') || 'Close'} onClick={() => setOpen(false)}>✕</button>
           </div>
 
@@ -180,11 +184,11 @@ export default function AssistantPanel() {
                 ref={keyEl}
                 type="password"
                 class="chat-keyinput"
-                placeholder="Claude (Anthropic) API-sleutel — sk-ant-…"
+                placeholder={t('assistant.keyPlaceholder') || 'Claude (Anthropic) API key — sk-ant-…'}
                 value={apiKey()}
                 onKeyDown={(e) => { if (e.key === 'Enter') saveKey(); }}
               />
-              <button class="chat-keysave" onClick={saveKey}>Opslaan</button>
+              <button class="chat-keysave" onClick={saveKey}>{t('assistant.save') || 'Save'}</button>
             </div>
           </Show>
 
@@ -205,7 +209,13 @@ export default function AssistantPanel() {
           <Show when={!loading()}>
             <div class="chat-chips">
               <For each={ASSISTANT_SKILLS}>
-                {(skill) => <button class="chat-chip" title={skill.hint} onClick={() => runSkill(skill)}>{skill.icon} {skill.label}</button>}
+                {(skill) => (
+                  <button class="chat-chip"
+                    title={(skill.hintKey && t(skill.hintKey)) || skill.hint}
+                    onClick={() => runSkill(skill)}>
+                    {skill.icon} {(skill.labelKey && t(skill.labelKey)) || skill.label}
+                  </button>
+                )}
               </For>
             </div>
           </Show>
@@ -217,7 +227,7 @@ export default function AssistantPanel() {
               value={input()}
               onInput={(e) => setInput(e.currentTarget.value)}
               onKeyDown={onKeyDown}
-              placeholder="Vraag iets over deze PDF…"
+              placeholder={t('assistant.ask') || 'Ask something about this PDF…'}
               rows={2}
             />
             <button class="chat-send" onClick={send} disabled={loading() || !input().trim()}>➤</button>

@@ -160,5 +160,25 @@
     "copied": "Knipsel gekopieerd — plak het in een andere tekening",
     "failed": "Knippen mislukt",
     "clipboardEmpty": "Geen knipsel op het klembord"
-  }
+  },
+  "assistant": {
+    "connected": "via Claude",
+    "notConnected": "niet verbonden",
+    "workingIn": "werkt in",
+    "setKey": "Claude (Anthropic) API-sleutel instellen",
+    "keyPlaceholder": "Claude (Anthropic) API-sleutel — sk-ant-…",
+    "save": "Opslaan",
+    "ask": "Vraag iets over deze PDF…",
+    "skill": {
+      "translate": "Vertaal",
+      "translateHint": "Vertaal de tekst van het document",
+      "summarize": "Vat samen",
+      "summarizeHint": "Vat het document of de tekening samen",
+      "draw": "Teken",
+      "drawHint": "Teken een element of annotatie op de tekening",
+      "doors": "Herken deuren",
+      "doorsHint": "Detecteer de deuren in de plattegrond en markeer ze"
+    }
+  },
+  "assistantTitle": "OpenAEC-assistent"
 }

@@ -160,5 +160,25 @@
     "copied": "Snippet copied — paste it into another drawing",
     "failed": "Cutting failed",
     "clipboardEmpty": "No snippet on the clipboard"
-  }
+  },
+  "assistant": {
+    "connected": "via Claude",
+    "notConnected": "not connected",
+    "workingIn": "working in",
+    "setKey": "Set Claude (Anthropic) API key",
+    "keyPlaceholder": "Claude (Anthropic) API key — sk-ant-…",
+    "save": "Save",
+    "ask": "Ask something about this PDF…",
+    "skill": {
+      "translate": "Translate",
+      "translateHint": "Translate the text of the document",
+      "summarize": "Summarise",
+      "summarizeHint": "Summarise the document or drawing",
+      "draw": "Draw",
+      "drawHint": "Draw an element or annotation on the drawing",
+      "doors": "Detect doors",
+      "doorsHint": "Detect the doors in the floor plan and mark them"
+    }
+  },
+  "assistantTitle": "OpenAEC assistant"
 }

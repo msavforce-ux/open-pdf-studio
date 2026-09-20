@@ -1,45 +1,58 @@
-// OpenAEC-assistent skill set.
+// OpenAEC assistant skill set.
 //
 // Each skill is a capability the assistant can perform on the open PDF. Clicking
 // a skill chip sends `invoke` as a user message; via the provider chain it reaches
 // the brain (Claude Code over the MCP relay, or any AI provider) which executes
 // it using the app's MCP tools. SKILLS_SYSTEM_PROMPT teaches the brain how.
+//
+// De zichtbare teksten lopen via i18n (labelKey/hintKey); de waarden hier zijn
+// de Engelse terugval. Het paneel stond volledig in het Nederlands, ook voor wie
+// de applicatie in het Engels draait — een knop die je niet kunt lezen is geen
+// knop.
 
 export const ASSISTANT_SKILLS = [
   {
     id: 'translate',
     icon: '🌐',
-    label: 'Vertaal',
-    hint: 'Vertaal de tekst van het document',
-    invoke: 'Vertaal de tekst van het geopende document. Is het Nederlands, vertaal dan naar het Engels; anders naar het Nederlands. Geef de vertaling overzichtelijk terug.',
+    labelKey: 'assistant.skill.translate',
+    hintKey: 'assistant.skill.translateHint',
+    label: 'Translate',
+    hint: 'Translate the text of the document',
+    invoke: 'Translate the text of the open document into English. If it is already in English, translate it into the language I am writing in. Present the translation clearly.',
   },
   {
     id: 'summarize',
     icon: '📝',
-    label: 'Vat samen',
-    hint: 'Vat het document of de tekening samen',
-    invoke: 'Vat het geopende document of de tekening bondig samen: waar gaat het over, de belangrijkste onderdelen en eventuele aandachtspunten.',
+    labelKey: 'assistant.skill.summarize',
+    hintKey: 'assistant.skill.summarizeHint',
+    label: 'Summarise',
+    hint: 'Summarise the document or drawing',
+    invoke: 'Summarise the open document or drawing concisely: what it covers, the main parts, and anything that needs attention.',
   },
   {
     id: 'draw',
     icon: '✏️',
-    label: 'Teken',
-    hint: 'Teken een element of annotatie op de tekening',
-    invoke: 'Teken op de tekening: ',
+    labelKey: 'assistant.skill.draw',
+    hintKey: 'assistant.skill.drawHint',
+    label: 'Draw',
+    hint: 'Draw an element or annotation on the drawing',
+    invoke: 'Draw on the drawing: ',
     needsInput: true,
   },
   {
     id: 'detect-doors',
     icon: '🚪',
-    label: 'Herken deuren',
-    hint: 'Detecteer de deuren in de plattegrond en markeer ze',
-    invoke: 'Bekijk de plattegrond, herken de deuren en markeer elke deur op de tekening met een markering en een korte label.',
+    labelKey: 'assistant.skill.doors',
+    hintKey: 'assistant.skill.doorsHint',
+    label: 'Detect doors',
+    hint: 'Detect the doors in the floor plan and mark them',
+    invoke: 'Look at the floor plan, identify the doors, and mark each one on the drawing with a markup and a short label.',
   },
 ];
 
 export const SKILLS_SYSTEM_PROMPT =
-  'Je beschikt over een vaardigheden-set en kunt ACTIES uitvoeren op het geopende PDF-document via de MCP-tools van de app:\n' +
-  '- Vertalen / samenvatten: gebruik app_screenshot_view (width 2000) om de pagina te bekijken en te lezen; geef het resultaat als tekst terug.\n' +
-  '- Tekenen: gebruik app_create_annotation. Coordinaten zijn paginapunten op 100% zoom; haal de paginamaat op met app_get_viewport_state (pageW/pageH).\n' +
-  '- Deuren herkennen: doe eerst app_fit_page, maak dan app_screenshot_view (width 2000), herken de deuren visueel en markeer elke deur met app_create_annotation (bijvoorbeeld een box of cloud rond de deur + een textbox-label). Reken screenshot-pixels om naar paginapunten via pageW/pageH.\n' +
-  'Antwoord in het Nederlands, bondig en praktisch. Voer gevraagde acties direct uit en meld kort wat je gedaan hebt.';
+  'You have a skill set and can perform ACTIONS on the open PDF document through the app\'s MCP tools:\n' +
+  '- Translating / summarising: use app_screenshot_view (width 2000) to look at and read the page; return the result as text.\n' +
+  '- Drawing: use app_create_annotation. Coordinates are page points at 100% zoom; get the page size with app_get_viewport_state (pageW/pageH).\n' +
+  '- Detecting doors: first app_fit_page, then app_screenshot_view (width 2000), recognise the doors visually and mark each one with app_create_annotation (for example a box or cloud around the door plus a textbox label). Convert screenshot pixels to page points via pageW/pageH.\n' +
+  'Answer in the language the user writes in, briefly and practically. Carry out requested actions directly and say shortly what you did.';
