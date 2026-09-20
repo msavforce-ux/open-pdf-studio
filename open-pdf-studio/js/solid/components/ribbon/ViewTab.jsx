@@ -1,3 +1,4 @@
+import { For } from 'solid-js';
 import RibbonGroup from './RibbonGroup.jsx';
 import AdaptiveGroups from './AdaptiveGroups.jsx';
 import RibbonButton from './RibbonButton.jsx';
@@ -7,6 +8,8 @@ import { singlePageIcon, continuousIcon, bookViewIcon, facingPagesIcon, navigati
 import { isFullscreen } from '../../stores/ribbonStore.js';
 import { toggleFullscreen } from '../../../ui/chrome/fullscreen.js';
 import { toggleSymbolPalette } from '../SymbolPalette.jsx';
+import { toggleExtPalette, isExtPaletteVisible } from '../ExtensionToolPalette.jsx';
+import { LINT_PALETTEN } from '../../data/lintPaletten.js';
 import { symbolPaletteVisible } from '../../stores/symbolStore.js';
 import { toggleKeystrokeOverlay, keystrokeOverlayVisible } from '../KeystrokeOverlay.jsx';
 import { setViewMode } from '../../../pdf/renderer.js';
@@ -125,6 +128,23 @@ export default function ViewTab() {
               re-exposed later if needed). */}
           <RibbonButton id="ribbon-symbol-palette" title="Toolpalette" icon={toolPaletteIcon} label="Toolpalette"
             active={symbolPaletteVisible()} onClick={toggleSymbolPalette} />
+        </RibbonGroup>
+
+        {/* Lintgroepen als losse paletten: aanzetten, dan met de muis naar
+            links, rechts of los in beeld slepen. Het paletsysteem onthoudt
+            waar je ze neerzet. */}
+        <RibbonGroup label={t('view.palettes') || 'Palettes'}>
+          <For each={LINT_PALETTEN}>
+            {(p) => (
+              <RibbonButton
+                id={`ribbon-palet-${p.id}`}
+                title={(t(p.translationKey) || p.label) + ' — ' + (t('view.paletteHint') || 'drag to dock left, right or float')}
+                icon={p.icon}
+                label={t(p.translationKey) || p.label}
+                active={isExtPaletteVisible(p.id)}
+                onClick={() => toggleExtPalette(p.id)} />
+            )}
+          </For>
         </RibbonGroup>
 
         <RibbonGroup label={t('view.appearance')}>

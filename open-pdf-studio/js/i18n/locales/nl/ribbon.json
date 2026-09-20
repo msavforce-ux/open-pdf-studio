@@ -193,7 +193,9 @@
     "keystrokes": "Toetsaanslagen",
     "keystrokesHint": "Toon ingedrukte sneltoetsen links onderin (voor video-opnames)",
     "readerMode": "Leesmodus",
-    "readerModeTip": "Onthoud de pagina, scrollpositie en zoomniveau van elke PDF, ook nadat je hem sluit en weer opent"
+    "readerModeTip": "Onthoud de pagina, scrollpositie en zoomniveau van elke PDF, ook nadat je hem sluit en weer opent",
+    "palettes": "Paletten",
+    "paletteHint": "sleep naar links, rechts of los in beeld"
   },
   "elementVisibility": {
     "buttonTitle": "Zichtbaarheid Elementen — toon/verberg en dim annotatie-soorten",
