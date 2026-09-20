@@ -11,7 +11,10 @@ import { useTranslation } from '../../i18n/useTranslation.js';
 const GREETING =
   'Hello. I am the **OpenAEC assistant**. I can 🌐 translate, 📝 summarise, ✏️ draw on the drawing and 🚪 detect doors. Pick a skill below or just ask.';
 const ANTHROPIC_KEY_LS = 'opds-anthropic-key';
-const CLAUDE_MODEL = 'claude-sonnet-4-6';
+// Het actuele Sonnet-model. Stond op 'claude-sonnet-4-6'; een model dat de
+// API niet kent geeft een 404 die in het paneel als "de Claude-API gaf een
+// fout" verschijnt — onmogelijk te herleiden tot een verouderde modelnaam.
+const CLAUDE_MODEL = 'claude-sonnet-5';
 
 // Minimal markdown-lite rendering (bold, inline code, line breaks). The AI text
 // is HTML-escaped first so it can never inject markup.
@@ -32,12 +35,12 @@ function describeAiError(err) {
     return '⚠️ Invalid Claude (Anthropic) API key. Check it with the 🔑 button at the top right of this panel.';
   }
   if (/Claude API 4\d\d|Claude API 5\d\d/i.test(raw)) {
-    return `⚠️ De Claude-API gaf een fout.\n\n_Detail: ${raw}_`;
+    return `⚠️ The Claude API returned an error.\n\n_Detail: ${raw}_`;
   }
   if (/onbereikbaar|connection|econn|refused|failed to connect|timed out|failed to fetch/i.test(raw)) {
-    return '⚠️ Geen verbinding met de AI-dienst.';
+    return '⚠️ Could not reach the AI service.';
   }
-  return `⚠️ AI-aanroep mislukt.\n\n_Detail: ${raw || 'onbekende fout'}_`;
+  return `⚠️ The AI call failed.\n\n_Detail: ${raw || 'unknown error'}_`;
 }
 
 export default function AssistantPanel() {
@@ -99,7 +102,7 @@ export default function AssistantPanel() {
         throw new Error(`Claude API ${res.status}: ${tx.slice(0, 200)}`);
       }
       const data = await res.json();
-      return data?.content?.[0]?.text || 'Geen antwoord ontvangen.';
+      return data?.content?.[0]?.text || 'No answer received.';
     };
 
     // MCP relay — an external MCP client (e.g. Claude Code, with working Claude
@@ -107,10 +110,10 @@ export default function AssistantPanel() {
     // Final fallback so the assistant keeps working without a local key.
     const mcpRelay = async () => {
       const history = messages().slice(1)
-        .map((m) => `${m.role === 'user' ? 'Gebruiker' : 'Assistent'}: ${m.content}`)
+        .map((m) => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`)
         .join('\n\n');
       const docName = activeDocName();
-      const prompt = `${docName ? `Geopend document: ${docName}\n\n` : ''}${history}\n\nAssistent:`;
+      const prompt = `${docName ? `Open document: ${docName}\n\n` : ''}${history}\n\nAssistant:`;
       return await enqueueAssistantQuestion({ prompt, system: systemPrompt(), docName });
     };
 
