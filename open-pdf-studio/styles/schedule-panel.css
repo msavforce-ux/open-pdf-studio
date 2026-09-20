@@ -392,3 +392,15 @@
 .schedule-greep:hover {
   background: var(--theme-panel-resize-hover, #e08a3c);
 }
+
+/* Lege staat: alleen de titelbalk. Altijd zichtbaar mag niet betekenen dat
+   een leeg overzicht een kwart van de tekening opeet. */
+.schedule-gedockt.is-leeg {
+  height: auto;
+  min-height: 0;
+}
+
+.schedule-gedockt.is-leeg .schedule-body,
+.schedule-gedockt.is-leeg .schedule-footer {
+  display: none;
+}

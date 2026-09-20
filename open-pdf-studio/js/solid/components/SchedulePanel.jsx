@@ -137,6 +137,14 @@ export default function SchedulePanel() {
     document.body.style.userSelect = 'none';
   }
 
+  // Een LEGE staat mag geen ruimte innemen. Altijd zichtbaar betekent dat je
+  // hem niet hoeft op te roepen, niet dat hij een kwart van de tekening
+  // opeet zolang er niets gemeten is. Zonder metingen blijft alleen de
+  // titelbalk staan; zodra er een regel is, klapt hij open op de hoogte die
+  // je zelf instelde.
+  const leeg = () => (scheduleResult()?.count || 0) === 0;
+  const hoogte = () => (scheduleDocked() && leeg() ? null : scheduleHoogte());
+
   function placeOnPdf() {
     const doc = getActiveDocument();
     if (!doc) return;
@@ -165,9 +173,10 @@ export default function SchedulePanel() {
     <Show when={scheduleVisible()}>
       <div ref={dialogRef}
         class={scheduleDocked() ? 'schedule-gedockt' : 'modal-dialog schedule-modeless'}
-        style={scheduleDocked() ? `height:${scheduleHoogte()}px` : undefined}
+        classList={{ 'is-leeg': scheduleDocked() && leeg() }}
+        style={scheduleDocked() && hoogte() != null ? `height:${hoogte()}px` : undefined}
         role="dialog" aria-label={t('quantities.title')}>
-        <Show when={scheduleDocked()}>
+        <Show when={scheduleDocked() && !leeg()}>
           <div class="schedule-greep" onMouseDown={beginHoogteSlepen}
             title={t('quantities.dragHeight') || 'Drag to resize'} />
         </Show>
@@ -190,7 +199,7 @@ export default function SchedulePanel() {
         </div>
 
         {/* Schedule */}
-        <div class="schedule-body">
+        <div class="schedule-body" classList={{ 'is-leeg': scheduleDocked() && leeg() }}>
           <Show when={appearance().showTitle}>
             <div class="q-title">{t('quantities.title')}</div>
           </Show>
