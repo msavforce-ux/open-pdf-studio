@@ -13,6 +13,7 @@ import {
   scheduleDocked, setScheduleDocked,
   sortLevels,
 } from '../stores/quantitiesStore.js';
+import { scheduleHoogte, setScheduleHoogte } from '../stores/scheduleStore.js';
 import QuantitiesProperties from './QuantitiesProperties.jsx';
 import { hernoemMetingen, elementenVanGroep } from '../../annotations/groep-hernoemen.js';
 
@@ -115,6 +116,27 @@ export default function SchedulePanel() {
     });
   }
 
+  // Slepen aan de bovenrand verandert de hoogte. Bewust een eigen greep en
+  // geen CSS-resize: die zit in de hoek, is een paar pixels groot en je moet
+  // hem zoeken. Een balk over de volle breedte pak je meteen.
+  function beginHoogteSlepen(e) {
+    if (!scheduleDocked()) return;
+    e.preventDefault();
+    const startY = e.clientY;
+    const startH = scheduleHoogte();
+    const beweeg = (ev) => setScheduleHoogte(startH + (startY - ev.clientY));
+    const stop = () => {
+      document.removeEventListener('mousemove', beweeg);
+      document.removeEventListener('mouseup', stop);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    document.addEventListener('mousemove', beweeg);
+    document.addEventListener('mouseup', stop);
+    document.body.style.cursor = 'row-resize';
+    document.body.style.userSelect = 'none';
+  }
+
   function placeOnPdf() {
     const doc = getActiveDocument();
     if (!doc) return;
@@ -143,7 +165,12 @@ export default function SchedulePanel() {
     <Show when={scheduleVisible()}>
       <div ref={dialogRef}
         class={scheduleDocked() ? 'schedule-gedockt' : 'modal-dialog schedule-modeless'}
+        style={scheduleDocked() ? `height:${scheduleHoogte()}px` : undefined}
         role="dialog" aria-label={t('quantities.title')}>
+        <Show when={scheduleDocked()}>
+          <div class="schedule-greep" onMouseDown={beginHoogteSlepen}
+            title={t('quantities.dragHeight') || 'Drag to resize'} />
+        </Show>
         {/* Header */}
         <div class="modal-header" onMouseDown={onHeaderMouseDown}>
           <h2>{t('quantities.title')}</h2>
@@ -204,7 +231,14 @@ export default function SchedulePanel() {
                           {(row, i) => (
                             <tr classList={{ 'q-stripe': appearance().stripe && i() % 2 === 1 }}>
                               <For each={scheduleResult().columns}>
-                                {(col) => <td class={col.align === 'right' ? 'schedule-val' : ''}>{formatCell(row.vals[col.key], col)}</td>}
+                                {(col) => (
+                                  <td class={col.align === 'right' ? 'schedule-val' : ''}>
+                                    <Show when={col.kind === 'color'} fallback={formatCell(row.vals[col.key], col)}>
+                                      <span class="q-kleur" style={`background:${row.vals[col.key] || 'transparent'}`}
+                                        title={row.vals[col.key] || ''} />
+                                    </Show>
+                                  </td>
+                                )}
                               </For>
                             </tr>
                           )}

@@ -607,7 +607,8 @@
     },
     "dock": "Onderin vastzetten",
     "undock": "Los venster",
-    "renameGroup": "Hernoemen — geldt voor elke meting in deze groep"
+    "renameGroup": "Hernoemen — geldt voor elke meting in deze groep",
+    "dragHeight": "Sleep om de hoogte te wijzigen"
   },
   "parametricSymbol": {
     "defaultTitle": "Parametric symbol",

@@ -10,9 +10,27 @@ const [scheduleVisible, setScheduleVisible] = createSignal(false);
 // Wie liever een zwevend venster heeft, klikt het los — de keuze blijft staan.
 const [scheduleDocked, setScheduleDockedRaw] = createSignal(true);
 
+// De hoogte van de gedockte staat. Slepen aan de bovenrand verandert hem;
+// hij hoort de volgende keer nog te kloppen, anders zet je hem elke ochtend
+// opnieuw.
+const [scheduleHoogte, setScheduleHoogteRaw] = createSignal(260);
+
+export function setScheduleHoogte(px) {
+  const h = Math.max(90, Math.min(Math.round(px), Math.round((globalThis.innerHeight || 1000) * 0.8)));
+  setScheduleHoogteRaw(h);
+  state.preferences.scheduleHoogte = h;
+  savePreferences();
+}
+
 export function initScheduleDock() {
   const v = state.preferences?.scheduleDocked;
   if (typeof v === 'boolean') setScheduleDockedRaw(v);
+  const h = state.preferences?.scheduleHoogte;
+  if (typeof h === 'number' && h >= 90) setScheduleHoogteRaw(h);
+  // Gedockt onderin is de staat geen venster dat je oproept maar een deel van
+  // het werkblad: hij staat er gewoon. Wie hem wegklikt, houdt hem weg.
+  const z = state.preferences?.scheduleVisible;
+  setScheduleVisible(typeof z === 'boolean' ? z : scheduleDocked());
 }
 
 export function setScheduleDocked(v) {
@@ -194,12 +212,17 @@ export const allElementsTally = createMemo(() => {
 export const allElementsTotal = createMemo(() => (getActiveDocument()?.annotations || []).length);
 
 export function toggleSchedule() {
-  setScheduleVisible(!scheduleVisible());
+  const aan = !scheduleVisible();
+  setScheduleVisible(aan);
+  if (state.preferences) {
+    state.preferences.scheduleVisible = aan;
+    savePreferences();
+  }
 }
 
 export {
   scheduleVisible, setScheduleVisible,
-  scheduleDocked,
+  scheduleDocked, scheduleHoogte,
   groupBy, setGroupBy,
   filterType, setFilterType,
   filterPage, setFilterPage,

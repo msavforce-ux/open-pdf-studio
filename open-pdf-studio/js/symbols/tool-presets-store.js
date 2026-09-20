@@ -6,9 +6,9 @@
 
 import { state } from '../core/state.js';
 import { savePreferences } from '../core/preferences.js';
-import { maakPreset, voegToe, verwijder, bewerk } from './tool-presets.js';
+import { maakPreset, voegToe, verwijder, bewerk, kistBijwerkingVoor } from './tool-presets.js';
 
-export { maakPreset, voegToe, verwijder, bewerk, naarToolOverrides, PRESET_TOOLS } from './tool-presets.js';
+export { maakPreset, voegToe, verwijder, bewerk, presetVanMeting, kistBijwerkingVoor, naarToolOverrides, PRESET_TOOLS } from './tool-presets.js';
 
 export function getToolPresets() {
   return state.preferences?.customToolPresets || [];
@@ -31,6 +31,18 @@ export function addToolPreset(velden) {
 export function updateToolPreset(id, velden) {
   bewaar(bewerk(getToolPresets(), id, velden));
   return getToolPresets().find((p) => p.id === id) || null;
+}
+
+/**
+ * Neem een wijziging aan één meting over in het gereedschap waarmee ze
+ * gemaakt is, zodat de volgende meting er meteen zo uitziet.
+ * @returns {boolean} of er iets veranderd is
+ */
+export function kistVolgtMeting(meting, sleutel, waarde) {
+  const b = kistBijwerkingVoor(getToolPresets(), meting, sleutel, waarde);
+  if (!b) return false;
+  bewaar(bewerk(getToolPresets(), b.id, b.velden));
+  return true;
 }
 
 export function removeToolPreset(id) {

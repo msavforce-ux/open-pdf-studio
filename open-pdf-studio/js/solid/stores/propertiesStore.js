@@ -1247,6 +1247,15 @@ export function updateAnnotProp(key, value) {
 
   if (!currentAnnotation) return;
 
+  // Een kleur- of lijndiktewijziging op een meting die met een bewaard
+  // gereedschap gemaakt is, hoort ook in dat gereedschap te landen: anders
+  // zet je hem bij elke volgende meting opnieuw.
+  try {
+    import('../../symbols/tool-presets-store.js')
+      .then((m) => m.kistVolgtMeting?.(currentAnnotation, key, value))
+      .catch(() => {});
+  } catch { /* de kist is nooit een reden om een wijziging te blokkeren */ }
+
   if (currentAnnotation.id === '__tool-defaults__'
       && currentAnnotation.type === 'parametricSymbol'
       && key === 'params') {

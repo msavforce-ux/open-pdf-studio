@@ -50,11 +50,11 @@ function withScale(a) {
 }
 
 // --- Config signals ---
-const [selectedCategories, setSelectedCategories] = createSignal(['area', 'line-based', 'count']);
+const [selectedCategories, setSelectedCategories] = createSignal(['area', 'line-based', 'count', 'symbol', 'text-annotation']);
 // Standaardkolommen: naam en hoeveelheid horen er meteen bij te staan. Met
 // alleen type/pagina/aantal moest je elke staat eerst zelf inrichten voordat
 // je zag wat je getekend had.
-const [scheduledFields, setScheduledFields] = createSignal(['type', 'page', 'label', 'area', 'length', 'count']);
+const [scheduledFields, setScheduledFields] = createSignal(['color', 'label', 'type', 'page', 'area', 'length', 'count']);
 const [filters, setFilters] = createSignal([]);
 // Groeperen op de NAAM van het gereedschap, niet op categorie: dat is de
 // Subject-kolom waarop de markup-lijst in Bluebeam groepeert, en het is de

@@ -305,7 +305,9 @@ const COMMON = [
   // meet-vlak geeft ("Woonkamer"). Die stond nergens in de staat, waardoor de
   // Label-kolom voor oppervlaktes altijd leeg bleef.
   F('label', 'Label', 'text', el => el.label || el.measureName || el.subject || ''),
-  F('color', 'Color', 'text', el => el.color || el.strokeColor || el.fillColor || ''),
+  // Als KLEUR, niet als hextekst: een staat waarin je "#e11d48" leest zegt
+  // niets, een gekleurd blokje laat je de regel terugvinden op de tekening.
+  F('color', 'Color', 'color', el => el.color || el.strokeColor || el.fillColor || ''),
   F('ifcCategory', 'IFC category', 'text', el => el.ifcCategory || ''),
   F('count', 'Count', 'number', () => 1, '', 0),
 ];

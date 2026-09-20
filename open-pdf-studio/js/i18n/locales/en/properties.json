@@ -607,7 +607,8 @@
     },
     "dock": "Dock at the bottom",
     "undock": "Float",
-    "renameGroup": "Rename — applies to every measurement in this group"
+    "renameGroup": "Rename — applies to every measurement in this group",
+    "dragHeight": "Drag to resize"
   },
   "parametricSymbol": {
     "defaultTitle": "Parametric symbol",

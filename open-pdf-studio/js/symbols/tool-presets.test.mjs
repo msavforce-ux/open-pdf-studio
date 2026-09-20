@@ -6,7 +6,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { maakPreset, voegToe, verwijder, bewerk, naarToolOverrides, PRESET_TOOLS } from './tool-presets.js';
+import { maakPreset, voegToe, verwijder, bewerk, presetVanMeting, kistBijwerkingVoor, naarToolOverrides, PRESET_TOOLS } from './tool-presets.js';
 
 test('een gereedschap heeft een naam en een meetgereedschap nodig', () => {
   assert.equal(maakPreset({ naam: '', tool: 'measureArea' }), null);
@@ -119,4 +119,38 @@ test('een onbekend id verandert niets', () => {
   const a = maakPreset({ naam: 'A', tool: 'count' });
   const lijst = voegToe([], a);
   assert.deepEqual(bewerk(lijst, 'bestaat-niet', { naam: 'B' }), lijst);
+});
+
+test('een meting hoort bij het gereedschap met dezelfde naam én meetsoort', () => {
+  const a = maakPreset({ naam: 'SM-01 Pertvaros', tool: 'measureDistance' });
+  const b = maakPreset({ naam: 'SM-01 Pertvaros', tool: 'count' });
+  const lijst = voegToe(voegToe([], a), b);
+
+  assert.equal(presetVanMeting(lijst, { type: 'measureDistance', label: 'SM-01 Pertvaros' }).id, a.id);
+  assert.equal(presetVanMeting(lijst, { type: 'count', subject: 'sm-01 pertvaros' }).id, b.id);
+  assert.equal(presetVanMeting(lijst, { type: 'measureArea', label: 'SM-01 Pertvaros' }), null);
+  assert.equal(presetVanMeting(lijst, { type: 'measureDistance' }), null, 'zonder naam geen koppeling');
+  assert.equal(presetVanMeting(lijst, null), null);
+});
+
+test('kleur wijzigen op een meting werkt het gereedschap bij', () => {
+  const a = maakPreset({ naam: 'GR-01', tool: 'measureArea', strokeColor: '#000000', lineWidth: 2 });
+  const lijst = voegToe([], a);
+  const meting = { type: 'measureArea', label: 'GR-01' };
+
+  assert.deepEqual(kistBijwerkingVoor(lijst, meting, 'color', '#e11d48'),
+    { id: a.id, velden: { strokeColor: '#e11d48' } });
+  assert.deepEqual(kistBijwerkingVoor(lijst, meting, 'lineWidth', 4),
+    { id: a.id, velden: { lineWidth: 4 } });
+});
+
+test('niets te doen blijft niets te doen', () => {
+  const a = maakPreset({ naam: 'GR-01', tool: 'measureArea', strokeColor: '#000000' });
+  const lijst = voegToe([], a);
+  const meting = { type: 'measureArea', label: 'GR-01' };
+
+  assert.equal(kistBijwerkingVoor(lijst, meting, 'color', '#000000'), null, 'zelfde kleur');
+  assert.equal(kistBijwerkingVoor(lijst, meting, 'opacity', 0.5), null, 'geen overneembaar veld');
+  assert.equal(kistBijwerkingVoor(lijst, meting, 'lineWidth', 0), null, 'lijndikte 0 bestaat niet');
+  assert.equal(kistBijwerkingVoor(lijst, { type: 'measureArea', label: 'anders' }, 'color', '#fff'), null);
 });

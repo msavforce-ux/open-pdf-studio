@@ -319,13 +319,10 @@
    (naam, blad, lengte, oppervlak, aantal) naast elkaar in beeld. */
 .schedule-gedockt {
   flex-shrink: 0;
-  height: 260px;
   min-height: 90px;
-  max-height: 70vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  resize: vertical;
   font-size: 11px;
   color: var(--theme-text, #333);
   background: var(--theme-panel-bg);
@@ -371,4 +368,27 @@
   background: var(--theme-panel-bg, #2b2b2b);
   border-color: var(--theme-panel-accent, #e08a3c);
   outline: none;
+}
+
+/* Kleurblokje in de staat: dezelfde kleur als op de tekening, zodat je een
+   regel terugvindt zonder hem aan te klikken. */
+.q-kleur {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border: 1px solid var(--theme-panel-border, #555);
+  vertical-align: middle;
+}
+
+/* Sleepbalk over de volle breedte: hier pak je de staat om hem hoger of
+   lager te maken. De CSS-resizehoek zat rechtsonder en was niet te vinden. */
+.schedule-greep {
+  height: 6px;
+  flex: none;
+  cursor: row-resize;
+  background: var(--theme-panel-resize, #3a3a3a);
+}
+
+.schedule-greep:hover {
+  background: var(--theme-panel-resize-hover, #e08a3c);
 }

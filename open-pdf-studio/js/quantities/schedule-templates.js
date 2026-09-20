@@ -76,8 +76,11 @@ export const STANDARD_SCHEDULE_TEMPLATES = [
     id: 'toolchest',
     nameKey: 'schedules.tpl.toolchest',
     config: {
-      categories: ['area', 'line-based', 'count'],
-      fields: ['label', 'type', 'page', 'length', 'area', 'count'],
+      // Metingen én markeringen in één lijst: op de tekening staan ze door
+      // elkaar, dus in de staat ook. De kleurkolom maakt ze uit elkaar te
+      // houden zonder de rij aan te klikken.
+      categories: ['area', 'line-based', 'count', 'symbol', 'text-annotation'],
+      fields: ['color', 'label', 'type', 'page', 'length', 'area', 'count'],
       sort: [{ field: 'label', dir: 'asc', group: true, header: true, footer: true }],
       itemize: true,
     },

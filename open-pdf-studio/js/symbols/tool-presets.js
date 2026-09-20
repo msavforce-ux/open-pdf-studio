@@ -115,3 +115,41 @@ export function bewerk(lijst, id, velden = {}) {
   kopie[index] = nieuw;
   return kopie;
 }
+
+/** De velden die een gereedschap van een meting overneemt. */
+const OVERNEEMBAAR = { color: 'strokeColor', strokeColor: 'strokeColor', lineWidth: 'lineWidth', fillColor: 'fillColor' };
+
+/**
+ * Welk bewaard gereedschap hoort bij deze meting?
+ *
+ * De koppeling loopt via de NAAM: het gereedschap zet zijn naam in
+ * label/subject, dus een meting met die naam is met dat gereedschap gemaakt.
+ * Het meetgereedschap moet ook kloppen — "SM-01" als lengte en als aantal
+ * zijn twee verschillende posten.
+ */
+export function presetVanMeting(lijst, meting) {
+  if (!meting) return null;
+  const naam = String(meting.label || meting.subject || meting.measureName || '').trim().toLowerCase();
+  if (!naam) return null;
+  return (Array.isArray(lijst) ? lijst : [])
+    .find((p) => p.tool === meting.type && p.naam.toLowerCase() === naam) || null;
+}
+
+/**
+ * Verander je aan één meting de kleur of de lijndikte, dan is dat een
+ * correctie op het GEREEDSCHAP, niet op die ene meting: de volgende meting
+ * met hetzelfde gereedschap hoort er meteen zo uit te zien. Zonder dit zet je
+ * de kleur telkens opnieuw en loopt de kist uit de pas met de tekening.
+ *
+ * @returns {{id: string, velden: object}|null} wat er bijgewerkt moet worden
+ */
+export function kistBijwerkingVoor(lijst, meting, sleutel, waarde) {
+  const veld = OVERNEEMBAAR[sleutel];
+  if (!veld) return null;
+  const preset = presetVanMeting(lijst, meting);
+  if (!preset) return null;
+  if (veld === 'lineWidth' && !(Number.isFinite(waarde) && waarde > 0)) return null;
+  if (veld !== 'lineWidth' && veld !== 'fillColor' && !waarde) return null;
+  if (preset[veld] === waarde) return null;      // al goed, niets te doen
+  return { id: preset.id, velden: { [veld]: waarde } };
+}
