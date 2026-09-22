@@ -8,7 +8,6 @@
     "markup": "การมาร์กอัป",
     "behavior": "พฤติกรรม",
     "fileAssociation": "การเชื่อมโยงไฟล์",
-    "virtualPrinter": "เครื่องพิมพ์เสมือน",
     "pageDisplay": "การแสดงหน้า"
   },
   "resetToDefaults": "รีเซ็ตเป็นค่าเริ่มต้น",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "ชื่อผู้เขียน",
     "language": "ภาษา",
     "interfaceLanguage": "ภาษาของส่วนติดต่อ",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "การเชื่อมต่อ AI (MCP)",
     "aiLinkAllow": "อนุญาตให้ผู้ช่วย AI (เช่น Claude Desktop) ควบคุมแอปนี้",
     "aiLinkPort": "พอร์ต",
@@ -157,20 +154,6 @@
     "linuxInstructions": "เพื่อตั้ง Open PDF Studio เป็นตัวอ่าน PDF เริ่มต้นบน Linux:\n\nรันในเทอร์มินัล:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "ตรวจสอบ Finder > ดูข้อมูล",
     "notSet": "ยังไม่ได้ตั้งค่า"
-  },
-  "virtualPrinter": {
-    "title": "เครื่องพิมพ์เสมือน",
-    "description": "ติดตั้ง \"Open PDF Studio\" เป็นเครื่องพิมพ์ Windows เมื่อคุณพิมพ์จากแอปพลิเคชันใดก็ได้ (Word, Chrome, Notepad ฯลฯ) และเลือกเครื่องพิมพ์นี้ ไฟล์ PDF ผลลัพธ์จะเปิดในแอปนี้โดยอัตโนมัติ",
-    "status": "สถานะ:",
-    "installButton": "ติดตั้งเครื่องพิมพ์เสมือน",
-    "removeButton": "ลบเครื่องพิมพ์เสมือน",
-    "installNote": "การติดตั้งต้องมีสิทธิ์ผู้ดูแลระบบ (แจ้ง UAC) เครื่องพิมพ์ใช้ไดรเวอร์ \"Microsoft Print to PDF\" ในตัว",
-    "installing": "กำลังติดตั้ง...",
-    "removing": "กำลังลบ...",
-    "installationFailed": "การติดตั้งล้มเหลว",
-    "removalFailed": "การลบล้มเหลว",
-    "failedToInstall": "ไม่สามารถติดตั้งเครื่องพิมพ์เสมือน:",
-    "failedToRemove": "ไม่สามารถลบเครื่องพิมพ์เสมือน:"
   },
   "pageDisplay": {
     "rendering": "การเรนเดอร์",

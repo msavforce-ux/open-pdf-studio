@@ -8,7 +8,6 @@
     "markup": "Đánh dấu",
     "behavior": "Hành vi",
     "fileAssociation": "Liên kết Tệp",
-    "virtualPrinter": "Máy in Ảo",
     "pageDisplay": "Hiển thị trang"
   },
   "resetToDefaults": "Đặt lại Mặc định",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "Tên Tác giả",
     "language": "Ngôn ngữ",
     "interfaceLanguage": "Ngôn ngữ Giao diện",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "Kết nối AI (MCP)",
     "aiLinkAllow": "Cho phép trợ lý AI (như Claude Desktop) điều khiển ứng dụng này",
     "aiLinkPort": "Cổng",
@@ -157,20 +154,6 @@
     "linuxInstructions": "Để đặt Open PDF Studio làm trình xem PDF mặc định trên Linux:\n\nChạy trong terminal:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Kiểm tra Finder > Lấy Thông tin",
     "notSet": "Chưa đặt"
-  },
-  "virtualPrinter": {
-    "title": "Máy in Ảo",
-    "description": "Cài đặt \"Open PDF Studio\" làm máy in Windows. Khi bạn in từ bất kỳ ứng dụng nào (Word, Chrome, Notepad, v.v.) và chọn máy in này, tệp PDF đầu ra sẽ tự động mở trong ứng dụng này.",
-    "status": "Trạng thái:",
-    "installButton": "Cài đặt Máy in Ảo",
-    "removeButton": "Gỡ bỏ Máy in Ảo",
-    "installNote": "Cài đặt yêu cầu quyền quản trị viên (lời nhắc UAC). Máy in sử dụng trình điều khiển \"Microsoft Print to PDF\" tích hợp sẵn.",
-    "installing": "Đang cài đặt...",
-    "removing": "Đang gỡ bỏ...",
-    "installationFailed": "Cài đặt thất bại",
-    "removalFailed": "Gỡ bỏ thất bại",
-    "failedToInstall": "Không thể cài đặt máy in ảo:",
-    "failedToRemove": "Không thể gỡ bỏ máy in ảo:"
   },
   "pageDisplay": {
     "rendering": "Kết xuất",

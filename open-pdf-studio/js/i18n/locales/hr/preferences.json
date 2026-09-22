@@ -8,7 +8,6 @@
     "markup": "Označavanje",
     "behavior": "Ponašanje",
     "fileAssociation": "Asocijacija datoteka",
-    "virtualPrinter": "Virtualni pisač",
     "pageDisplay": "Prikaz stranice"
   },
   "resetToDefaults": "Vrati na zadano",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "Ime autora",
     "language": "Jezik",
     "interfaceLanguage": "Jezik sučelja",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "AI veza (MCP)",
     "aiLinkAllow": "Dopusti AI asistentima (poput Claude Desktop) upravljanje ovom aplikacijom",
     "aiLinkPort": "Priključak",
@@ -157,20 +154,6 @@
     "linuxInstructions": "Za postavljanje Open PDF Studio kao zadanog PDF preglednika na Linuxu:\n\nPokrenite u terminalu:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Provjerite Finder > Get Info",
     "notSet": "Nije postavljeno"
-  },
-  "virtualPrinter": {
-    "title": "Virtualni pisač",
-    "description": "Instalirajte \"Open PDF Studio\" kao Windows pisač. Kada ispisujete iz bilo koje aplikacije (Word, Chrome, Notepad itd.) i odaberete ovaj pisač, izlazni PDF će se automatski otvoriti u ovoj aplikaciji.",
-    "status": "Status:",
-    "installButton": "Instaliraj virtualni pisač",
-    "removeButton": "Ukloni virtualni pisač",
-    "installNote": "Instalacija zahtijeva administratorske ovlasti (UAC upit). Pisač koristi ugrađeni \"Microsoft Print to PDF\" upravljački program.",
-    "installing": "Instalacija...",
-    "removing": "Uklanjanje...",
-    "installationFailed": "Instalacija nije uspjela",
-    "removalFailed": "Uklanjanje nije uspjelo",
-    "failedToInstall": "Nije uspjela instalacija virtualnog pisača:",
-    "failedToRemove": "Nije uspjelo uklanjanje virtualnog pisača:"
   },
   "pageDisplay": {
     "rendering": "Iscrtavanje",

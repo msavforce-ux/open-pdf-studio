@@ -8,7 +8,6 @@
     "markup": "Marcatge",
     "behavior": "Comportament",
     "fileAssociation": "Associació de fitxers",
-    "virtualPrinter": "Impressora virtual",
     "pageDisplay": "Visualització de pàgina"
   },
   "resetToDefaults": "Reinicia als valors per defecte",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "Nom d'autor",
     "language": "Idioma",
     "interfaceLanguage": "Idioma de la interfície",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "Connexió d'IA (MCP)",
     "aiLinkAllow": "Permet que els assistents d'IA (com Claude Desktop) controlin aquesta aplicació",
     "aiLinkPort": "Port",
@@ -157,20 +154,6 @@
     "linuxInstructions": "Per establir Open PDF Studio com a visualitzador PDF per defecte al Linux:\n\nExecuteu al terminal:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Comproveu Finder > Obtenir informació",
     "notSet": "No establert"
-  },
-  "virtualPrinter": {
-    "title": "Impressora virtual",
-    "description": "Instal·leu \"Open PDF Studio\" com a impressora de Windows. Quan imprimiu des de qualsevol aplicació (Word, Chrome, Bloc de notes, etc.) i seleccioneu aquesta impressora, el PDF resultant s'obrirà automàticament en aquesta aplicació.",
-    "status": "Estat:",
-    "installButton": "Instal·la la impressora virtual",
-    "removeButton": "Suprimeix la impressora virtual",
-    "installNote": "La instal·lació requereix privilegis d'administrador (sol·licitud UAC). La impressora utilitza el controlador integrat \"Microsoft Print to PDF\".",
-    "installing": "Instal·lant...",
-    "removing": "Suprimint...",
-    "installationFailed": "La instal·lació ha fallat",
-    "removalFailed": "La supressió ha fallat",
-    "failedToInstall": "No s'ha pogut instal·lar la impressora virtual:",
-    "failedToRemove": "No s'ha pogut suprimir la impressora virtual:"
   },
   "pageDisplay": {
     "rendering": "Renderització",

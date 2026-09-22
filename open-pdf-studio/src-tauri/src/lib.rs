@@ -3,7 +3,6 @@
 // default limit of 128 once the tool count grew past ~30.
 #![recursion_limit = "256"]
 
-mod accounts;
 mod email;
 pub mod linux_runtime;
 pub mod mcp_app_bridge;
@@ -402,36 +401,89 @@ fn no_window_command(program: &str) -> std::process::Command {
     c
 }
 
-/// Enumerate installed printers via PowerShell CIM.
-/// Returns a JSON array of printer objects.
-/// async: sync commands run on the main event-loop thread, and this one
-/// blocks on a PowerShell subprocess for ~1s — long enough to freeze window
-/// show and input processing at startup. Async moves it to the runtime pool.
+/// Enumerate installed printers.
+///
+/// Windows: rechtstreeks via EnumPrintersW. Dit liep eerst langs PowerShell
+/// ("Get-CimInstance Win32_Printer"), en dat is precies wat een EDR niet wil
+/// zien: een ongetekende toepassing die bij het openen van een printdialoog
+/// powershell.exe start. De Win32-aanroep doet hetzelfde werk in het eigen
+/// proces, zonder subproces en zonder scripttaal.
+/// async: sync commands draaien op de event-loop-thread, en enumeratie kan bij
+/// netwerkprinters even duren.
 #[tauri::command]
 async fn get_printers() -> Result<String, String> {
     #[cfg(target_os = "windows")]
     {
-        let output = no_window_command("powershell")
-            .args(&[
-                "-NoProfile", "-NonInteractive", "-Command",
-                "Get-CimInstance -ClassName Win32_Printer | Select-Object Name, DriverName, Default, PrinterStatus | ConvertTo-Json -Compress"
-            ])
-            .output()
-            .map_err(|e| format!("Failed to enumerate printers: {}", e))?;
+        use windows_sys::Win32::Graphics::Printing::{
+            EnumPrintersW, GetDefaultPrinterW, PRINTER_ENUM_CONNECTIONS, PRINTER_ENUM_LOCAL,
+            PRINTER_INFO_2W,
+        };
 
-        if !output.status.success() {
-            let stderr = String::from_utf8_lossy(&output.stderr);
-            return Err(format!("PowerShell error: {}", stderr));
+        /// UTF-16 tot de nulterminator; EnumPrintersW geeft rauwe pointers.
+        unsafe fn wide(ptr: *const u16) -> String {
+            if ptr.is_null() {
+                return String::new();
+            }
+            let mut n = 0usize;
+            while *ptr.add(n) != 0 {
+                n += 1;
+            }
+            String::from_utf16_lossy(std::slice::from_raw_parts(ptr, n))
         }
 
-        let stdout = String::from_utf8_lossy(&output.stdout).to_string();
-        // PowerShell returns a single object (not array) when there's only one printer
-        let trimmed = stdout.trim();
-        if trimmed.starts_with('{') {
-            Ok(format!("[{}]", trimmed))
-        } else {
-            Ok(trimmed.to_string())
+        let vlaggen = PRINTER_ENUM_LOCAL | PRINTER_ENUM_CONNECTIONS;
+        let mut nodig: u32 = 0;
+        let mut aantal: u32 = 0;
+
+        // Eerste aanroep vraagt alleen hoeveel bytes er nodig zijn.
+        unsafe {
+            EnumPrintersW(vlaggen, std::ptr::null_mut(), 2, std::ptr::null_mut(), 0, &mut nodig, &mut aantal);
         }
+        if nodig == 0 {
+            return Ok("[]".to_string());
+        }
+
+        let mut buffer = vec![0u8; nodig as usize];
+        let ok = unsafe {
+            EnumPrintersW(vlaggen, std::ptr::null_mut(), 2, buffer.as_mut_ptr(), nodig, &mut nodig, &mut aantal)
+        };
+        if ok == 0 {
+            return Err("EnumPrinters failed".to_string());
+        }
+
+        // De standaardprinter staat niet in PRINTER_INFO_2W; die vragen we apart.
+        let standaard = unsafe {
+            let mut len: u32 = 0;
+            GetDefaultPrinterW(std::ptr::null_mut(), &mut len);
+            if len == 0 {
+                String::new()
+            } else {
+                let mut naam = vec![0u16; len as usize];
+                if GetDefaultPrinterW(naam.as_mut_ptr(), &mut len) == 0 {
+                    String::new()
+                } else {
+                    String::from_utf16_lossy(&naam[..len.saturating_sub(1) as usize])
+                }
+            }
+        };
+
+        let items = unsafe {
+            std::slice::from_raw_parts(buffer.as_ptr() as *const PRINTER_INFO_2W, aantal as usize)
+        };
+        let printers: Vec<serde_json::Value> = items
+            .iter()
+            .map(|p| unsafe {
+                let naam = wide(p.pPrinterName);
+                serde_json::json!({
+                    "Name": naam,
+                    "DriverName": wide(p.pDriverName),
+                    "Default": naam == standaard,
+                    "PrinterStatus": p.Status,
+                })
+            })
+            .collect();
+
+        serde_json::to_string(&printers).map_err(|e| e.to_string())
     }
 
     #[cfg(any(target_os = "linux", target_os = "macos"))]
@@ -775,460 +827,6 @@ fn delete_file(path: String) -> Result<bool, String> {
 #[tauri::command]
 fn rename_file(old_path: String, new_path: String) -> Result<bool, String> {
     fs::rename(&old_path, &new_path).map_err(|e| format!("Failed to rename file: {}", e))?;
-    Ok(true)
-}
-
-/// Run a PowerShell script with UAC elevation by writing it to a temp .ps1
-/// file, executing it as admin, and capturing errors via a log file.
-#[cfg(target_os = "windows")]
-fn run_elevated_ps_script(script: &str) -> Result<(), String> {
-    let temp_dir = std::env::temp_dir();
-    let timestamp = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map(|d| d.as_millis())
-        .unwrap_or(0);
-
-    let script_path = temp_dir.join(format!("ops_printer_{}.ps1", timestamp));
-    let log_path = temp_dir.join(format!("ops_printer_{}.log", timestamp));
-
-    // Wrap the script: redirect all errors to a log file, write "OK" on success
-    let wrapped = format!(
-        r#"try {{
-{}
-'OK' | Out-File -FilePath '{}' -Encoding UTF8
-}} catch {{
-$_.Exception.Message | Out-File -FilePath '{}' -Encoding UTF8
-exit 1
-}}"#,
-        script,
-        log_path.to_string_lossy(),
-        log_path.to_string_lossy()
-    );
-
-    fs::write(&script_path, &wrapped)
-        .map_err(|e| format!("Failed to write temp script: {}", e))?;
-
-    // Launch elevated: Start-Process -Verb RunAs -Wait on the .ps1 file
-    // Build the -ArgumentList as a single quoted string with each param separated by commas.
-    // The script path is passed as a properly escaped argument, not interpolated into a command string.
-    use std::os::windows::process::CommandExt;
-    const CREATE_NO_WINDOW: u32 = 0x08000000;
-    let script_path_str = script_path.to_string_lossy().to_string();
-    let arg_list = format!(
-        "'-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File','{}'",
-        script_path_str.replace('\'', "''")
-    );
-    let output = std::process::Command::new("powershell")
-        .arg("-NoProfile")
-        .arg("-NonInteractive")
-        .arg("-Command")
-        .arg(format!(
-            "Start-Process powershell -Verb RunAs -Wait -WindowStyle Hidden -ArgumentList {}",
-            arg_list
-        ))
-        .creation_flags(CREATE_NO_WINDOW)
-        .output()
-        .map_err(|e| format!("Failed to launch elevated process: {}", e))?;
-
-    // Read the log file written by the elevated process
-    let log_content = fs::read_to_string(&log_path).unwrap_or_default();
-    let log_trimmed = log_content.trim();
-
-    // Cleanup temp files
-    let _ = fs::remove_file(&script_path);
-    let _ = fs::remove_file(&log_path);
-
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(format!("UAC elevation failed: {}", stderr));
-    }
-
-    if log_trimmed.is_empty() {
-        return Err("Elevated script produced no output — user may have cancelled UAC".to_string());
-    }
-
-    // Check BOM-prefixed "OK" (UTF-8 BOM from Out-File)
-    if log_trimmed == "OK" || log_trimmed.ends_with("OK") {
-        Ok(())
-    } else {
-        Err(format!("Elevated script error: {}", log_trimmed))
-    }
-}
-
-/// Install a virtual printer named "Open PDF Printer" using the built-in
-/// "Microsoft Print to PDF" driver. Sets the default paper size to A4.
-/// Requires one-time UAC admin elevation.
-///
-/// `use_collection` (DEFAULT true — the "catch and merge" behaviour):
-///   - `true` (default) → routes the output to a fixed file port pointing at
-///     `%LOCALAPPDATA%\OpenPDFPrinter\spool\latest.pdf`. NO Windows Save As
-///     dialog appears. Our app watches that folder, rotates the captured
-///     file into a timestamped job, and pops the print-queue dialog so the
-///     user can merge/reorder multiple print jobs from ANY program before
-///     saving. (Single-port approach: concurrent print jobs lock on the
-///     rotate step inside the app — Windows already serialises print jobs to
-///     a given port so the race window is tiny.)
-///   - `false` → PORTPROMPT: port (legacy): each print job pops the standard
-///     Windows Save As dialog. Only used if explicitly requested.
-///
-/// Backward compatibility: removes the legacy printer name "Open PDF
-/// Studio" if present, so an existing installation cleanly migrates to
-/// the new name on next install.
-#[tauri::command]
-fn install_virtual_printer(use_collection: Option<bool>) -> Result<bool, String> {
-    #[cfg(target_os = "windows")]
-    {
-        // Default to the silent collection port — the user wants prints
-        // CAUGHT for merging, never a Save As dialog.
-        let use_collection = use_collection.unwrap_or(true);
-        let (port_setup_block, port_arg) = if use_collection {
-            // Pre-create the spool dir + port pointing at it. Windows
-            // file-ports require the port NAME to be the file path itself.
-            let local = std::env::var("LOCALAPPDATA")
-                .map_err(|_| "LOCALAPPDATA not set".to_string())?;
-            let spool_dir = std::path::Path::new(&local).join("OpenPDFPrinter").join("spool");
-            let spool_file = spool_dir.join("latest.pdf");
-            std::fs::create_dir_all(&spool_dir)
-                .map_err(|e| format!("Failed to create spool dir: {}", e))?;
-            let spool_file_str = spool_file.to_string_lossy().to_string();
-            (
-                format!(
-                    r#"$portPath = '{}'
-# Remove any existing port at this path before re-adding (Add-PrinterPort errors if it exists)
-try {{ Remove-PrinterPort -Name $portPath -ErrorAction SilentlyContinue }} catch {{}}
-Add-PrinterPort -Name $portPath
-"#,
-                    spool_file_str.replace('\'', "''")
-                ),
-                format!("'{}'", spool_file_str.replace('\'', "''")),
-            )
-        } else {
-            (String::new(), "'PORTPROMPT:'".to_string())
-        };
-
-        let script = format!(r#"$ErrorActionPreference = 'Stop'
-$printerName = 'Open PDF Printer'
-$legacyName = 'Open PDF Studio'
-
-# Remove the LEGACY-named printer if present (migration from older versions)
-try {{ Remove-Printer -Name $legacyName -ErrorAction SilentlyContinue }} catch {{}}
-try {{ Remove-Printer -Name $printerName -ErrorAction SilentlyContinue }} catch {{}}
-
-{}
-Add-Printer -Name $printerName -DriverName 'Microsoft Print to PDF' -PortName {}
-
-# Default paper size = A4 (don't let driver/locale defaults pick C-size).
-try {{ Set-PrintConfiguration -PrinterName $printerName -PaperSize A4 -ErrorAction Stop }} catch {{
-    Write-Host "Note: could not set default paper size to A4 (install still succeeded). $($_.Exception.Message)"
-}}"#, port_setup_block, port_arg);
-
-        run_elevated_ps_script(&script)?;
-        Ok(true)
-    }
-
-    #[cfg(not(target_os = "windows"))]
-    {
-        Err("Virtual printer is only supported on Windows".to_string())
-    }
-}
-
-/// Remove the "Open PDF Printer" virtual printer (and the legacy
-/// "Open PDF Studio" name if it exists). Requires UAC admin elevation.
-#[tauri::command]
-fn remove_virtual_printer() -> Result<bool, String> {
-    #[cfg(target_os = "windows")]
-    {
-        let script = r#"$ErrorActionPreference = 'Stop'
-$printerName = 'Open PDF Printer'
-$legacyName = 'Open PDF Studio'
-
-# Remove BOTH the current and legacy names so the UI status reflects
-# "not installed" regardless of which one the user has.
-try { Remove-Printer -Name $printerName -ErrorAction SilentlyContinue } catch {}
-try { Remove-Printer -Name $legacyName -ErrorAction SilentlyContinue } catch {}
-
-# Clean up any leftover local port from older installations
-Get-PrinterPort | Where-Object { $_.Name -like '*OpenPDFStudio*print-capture*' -or $_.Name -like '*OpenPDFPrinter*print-capture*' } | Remove-PrinterPort"#;
-
-        run_elevated_ps_script(script)?;
-        Ok(true)
-    }
-
-    #[cfg(not(target_os = "windows"))]
-    {
-        Err("Virtual printer is only supported on Windows".to_string())
-    }
-}
-
-// ── Virtual-printer job queue ───────────────────────────────────────────
-// With the collection port installed, every print to "Open PDF Printer"
-// lands as spool/latest.pdf. The queue sweeps that into unique job files
-// (so the next print can't overwrite it) and lists them for the in-app
-// merge/reorder dialog.
-
-fn vp_spool_dir() -> Result<std::path::PathBuf, String> {
-    let base = dirs::data_local_dir().ok_or("local data dir unknown")?;
-    Ok(base.join("OpenPDFPrinter").join("spool"))
-}
-
-/// Sweep the spool: rename a finished `latest.pdf` into `job_<epoch>.pdf`.
-/// Returns true when a new job was collected. The driver may still be
-/// writing — only collect once the file has been stable for a moment.
-#[tauri::command]
-fn virtual_printer_collect() -> Result<bool, String> {
-    let dir = vp_spool_dir()?;
-    let latest = dir.join("latest.pdf");
-    if !latest.exists() {
-        return Ok(false);
-    }
-    let meta = std::fs::metadata(&latest).map_err(|e| e.to_string())?;
-    if meta.len() == 0 {
-        return Ok(false);
-    }
-    if let Ok(modified) = meta.modified() {
-        if let Ok(age) = modified.elapsed() {
-            if age.as_millis() < 1500 {
-                return Ok(false);
-            }
-        }
-    }
-    let stamp = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map(|d| d.as_millis())
-        .unwrap_or(0);
-    let job = dir.join(format!("job_{stamp}.pdf"));
-    match std::fs::rename(&latest, &job) {
-        Ok(()) => Ok(true),
-        // Still locked by the spooler — pick it up on the next sweep.
-        Err(_) => Ok(false),
-    }
-}
-
-#[derive(serde::Serialize)]
-#[serde(rename_all = "camelCase")]
-struct VpJob {
-    file: String,
-    path: String,
-    size: u64,
-    modified_ms: u64,
-    pages: u32,
-}
-
-/// List collected jobs (oldest first — print order).
-#[tauri::command]
-fn virtual_printer_jobs() -> Result<Vec<VpJob>, String> {
-    let dir = vp_spool_dir()?;
-    let mut jobs = Vec::new();
-    if let Ok(rd) = std::fs::read_dir(&dir) {
-        for e in rd.flatten() {
-            let name = e.file_name().to_string_lossy().to_string();
-            if !(name.starts_with("job_") && name.ends_with(".pdf")) {
-                continue;
-            }
-            let meta = match e.metadata() {
-                Ok(m) => m,
-                Err(_) => continue,
-            };
-            let modified_ms = meta
-                .modified()
-                .ok()
-                .and_then(|m| m.duration_since(std::time::UNIX_EPOCH).ok())
-                .map(|d| d.as_millis() as u64)
-                .unwrap_or(0);
-            let pages = lopdf::Document::load(e.path())
-                .map(|d| d.get_pages().len() as u32)
-                .unwrap_or(0);
-            jobs.push(VpJob {
-                file: name,
-                path: e.path().to_string_lossy().to_string(),
-                size: meta.len(),
-                modified_ms,
-                pages,
-            });
-        }
-    }
-    jobs.sort_by_key(|j| j.modified_ms);
-    Ok(jobs)
-}
-
-/// Delete one collected job. Basename only — no path traversal.
-#[tauri::command]
-fn virtual_printer_delete_job(file: String) -> Result<(), String> {
-    if file.contains('/') || file.contains('\\') || !file.starts_with("job_") || !file.ends_with(".pdf") {
-        return Err("invalid job file".into());
-    }
-    let p = vp_spool_dir()?.join(file);
-    std::fs::remove_file(&p).map_err(|e| e.to_string())
-}
-
-/// Whether "Open PDF Printer" is in SILENT CATCH mode — i.e. its port is the
-/// spool file (no Save As dialog). Returns false when it's on PORTPROMPT (the
-/// legacy save-dialog port) so the UI can offer to reconfigure it.
-#[tauri::command]
-fn virtual_printer_catch_enabled() -> bool {
-    #[cfg(target_os = "windows")]
-    {
-        let expected = match vp_spool_dir() {
-            Ok(p) => p.join("latest.pdf").to_string_lossy().to_lowercase(),
-            Err(_) => return false,
-        };
-        let out = no_window_command("powershell")
-            .args(&[
-                "-NoProfile", "-NonInteractive", "-Command",
-                "(Get-Printer -Name 'Open PDF Printer' -ErrorAction SilentlyContinue).PortName"
-            ])
-            .output();
-        match out {
-            Ok(o) => {
-                let port = String::from_utf8_lossy(&o.stdout).trim().to_lowercase();
-                !port.is_empty() && port == expected
-            }
-            Err(_) => false,
-        }
-    }
-    #[cfg(not(target_os = "windows"))]
-    {
-        false
-    }
-}
-
-/// Switch the EXISTING "Open PDF Printer" to the silent collection file port
-/// — turns OFF the Windows Save As dialog. Verified to work WITHOUT UAC:
-/// changing a printer's port is permitted for the current user (unlike
-/// ADDING a printer). This is the fix for a printer installed on PORTPROMPT.
-#[tauri::command]
-fn virtual_printer_enable_catch() -> Result<bool, String> {
-    #[cfg(target_os = "windows")]
-    {
-        let spool = vp_spool_dir()?;
-        std::fs::create_dir_all(&spool).map_err(|e| format!("spool dir: {e}"))?;
-        let port = spool.join("latest.pdf").to_string_lossy().to_string();
-        // Idempotent: only add the port if missing (Add-PrinterPort errors if
-        // it exists), then point the printer at it.
-        let script = format!(
-            r#"$ErrorActionPreference='Stop'
-$port = '{}'
-if (-not (Get-PrinterPort -Name $port -ErrorAction SilentlyContinue)) {{ Add-PrinterPort -Name $port }}
-Set-Printer -Name 'Open PDF Printer' -PortName $port"#,
-            port.replace('\'', "''")
-        );
-        let out = no_window_command("powershell")
-            .args(&["-NoProfile", "-NonInteractive", "-Command", &script])
-            .output()
-            .map_err(|e| format!("powershell: {e}"))?;
-        if !out.status.success() {
-            return Err(String::from_utf8_lossy(&out.stderr).trim().to_string());
-        }
-        Ok(true)
-    }
-    #[cfg(not(target_os = "windows"))]
-    {
-        Err("Windows only".into())
-    }
-}
-
-/// Check whether the "Open PDF Printer" virtual printer is installed.
-/// Also returns `true` for the legacy "Open PDF Studio" name so users on
-/// an older installation see "installed" until they reinstall.
-#[tauri::command]
-fn is_virtual_printer_installed() -> bool {
-    #[cfg(target_os = "windows")]
-    {
-        use std::os::windows::process::CommandExt;
-        const CREATE_NO_WINDOW: u32 = 0x08000000;
-        let output = std::process::Command::new("powershell")
-            .args(&[
-                "-NoProfile", "-NonInteractive", "-Command",
-                "(Get-Printer -Name 'Open PDF Printer' -ErrorAction SilentlyContinue) -or (Get-Printer -Name 'Open PDF Studio' -ErrorAction SilentlyContinue)"
-            ])
-            .creation_flags(CREATE_NO_WINDOW)
-            .output();
-
-        match output {
-            Ok(o) => {
-                let stdout = String::from_utf8_lossy(&o.stdout);
-                stdout.trim().eq_ignore_ascii_case("True")
-            }
-            Err(_) => false,
-        }
-    }
-
-    #[cfg(not(target_os = "windows"))]
-    {
-        false
-    }
-}
-
-/// Spool directory for the PDF Printer collection feature. Print jobs to
-/// "Open PDF Printer" can be routed here (instead of the PORTPROMPT save
-/// dialog) so our app captures the output and shows a multi-PDF collection
-/// dialog instead. Lives under %LOCALAPPDATA% so it's per-user and
-/// auto-cleaned on uninstall (Windows clears LocalAppData entries that
-/// reference removed apps via the standard cleanup flow).
-#[tauri::command]
-fn get_printer_spool_dir() -> Result<String, String> {
-    #[cfg(target_os = "windows")]
-    {
-        let local = std::env::var("LOCALAPPDATA")
-            .map_err(|_| "LOCALAPPDATA not set".to_string())?;
-        let dir = std::path::Path::new(&local).join("OpenPDFPrinter").join("spool");
-        std::fs::create_dir_all(&dir)
-            .map_err(|e| format!("Failed to create spool dir: {}", e))?;
-        Ok(dir.to_string_lossy().to_string())
-    }
-    #[cfg(not(target_os = "windows"))]
-    {
-        Err("PDF Printer is Windows-only".to_string())
-    }
-}
-
-/// List PDFs currently waiting in the printer spool directory. The collection
-/// dialog calls this on open and after each `printer:job-arrived` event so
-/// the user sees a live list of "PDFs the printer has captured but not yet
-/// merged or saved". Returns absolute paths sorted by creation time.
-#[tauri::command]
-fn list_printer_spool() -> Result<Vec<String>, String> {
-    #[cfg(target_os = "windows")]
-    {
-        let dir = get_printer_spool_dir()?;
-        let dir_path = std::path::Path::new(&dir);
-        let mut entries: Vec<(std::time::SystemTime, String)> = Vec::new();
-        for e in std::fs::read_dir(dir_path)
-            .map_err(|e| format!("Failed to read spool: {}", e))? {
-            if let Ok(entry) = e {
-                let path = entry.path();
-                if path.extension().and_then(|x| x.to_str()) == Some("pdf") {
-                    let created = entry.metadata().ok()
-                        .and_then(|m| m.created().ok())
-                        .unwrap_or(std::time::SystemTime::UNIX_EPOCH);
-                    entries.push((created, path.to_string_lossy().to_string()));
-                }
-            }
-        }
-        entries.sort_by_key(|(t, _)| *t);
-        Ok(entries.into_iter().map(|(_, p)| p).collect())
-    }
-    #[cfg(not(target_os = "windows"))]
-    {
-        Ok(Vec::new())
-    }
-}
-
-/// Remove a captured print-job PDF from the spool after the collection
-/// dialog has merged it into the saved output (or after the user clicks
-/// Discard). The collection dialog calls this for each spool entry it
-/// consumed so the next print job starts fresh.
-#[tauri::command]
-fn discard_spool_pdf(path: String) -> Result<bool, String> {
-    let p = std::path::Path::new(&path);
-    // Safety: only allow deletion under the spool directory to prevent the
-    // dialog from accidentally being tricked into rm-rf'ing arbitrary files.
-    let spool = get_printer_spool_dir()?;
-    if !p.starts_with(&spool) {
-        return Err("Path is not in the printer spool directory".to_string());
-    }
-    std::fs::remove_file(p)
-        .map_err(|e| format!("Failed to remove spool file: {}", e))?;
     Ok(true)
 }
 
@@ -2376,32 +1974,6 @@ fn read_clipboard_image_png(app: tauri::AppHandle) -> Result<tauri::ipc::Respons
     Ok(tauri::ipc::Response::new(png))
 }
 
-// Register/unregister the PrtScn global hotkey based on the user preference.
-// Called from the frontend when the "intercept PrtScn" preference changes and
-// at startup. Idempotent. Desktop only — the global-shortcut plugin has no
-// mobile backend, so on Android this is a no-op stub (see below).
-#[cfg(not(target_os = "android"))]
-#[tauri::command]
-fn set_prtscn_hotkey(app: tauri::AppHandle, enabled: bool) -> Result<(), String> {
-    use tauri_plugin_global_shortcut::{Code, GlobalShortcutExt, Shortcut};
-
-    let shortcut = Shortcut::new(None, Code::PrintScreen);
-    let gs = app.global_shortcut();
-    let is_registered = gs.is_registered(shortcut);
-    if enabled && !is_registered {
-        gs.register(shortcut).map_err(|e| e.to_string())?;
-    } else if !enabled && is_registered {
-        gs.unregister(shortcut).map_err(|e| e.to_string())?;
-    }
-    Ok(())
-}
-
-#[cfg(target_os = "android")]
-#[tauri::command]
-fn set_prtscn_hotkey(_app: tauri::AppHandle, _enabled: bool) -> Result<(), String> {
-    Ok(())
-}
-
 /// Antwoord van `ai_http_post`: de status hoort erbij, want een 401 van de
 /// aanbieder is een geldig antwoord dat het paneel zelf moet kunnen uitleggen.
 #[derive(serde::Serialize)]
@@ -2634,32 +2206,6 @@ pub fn run(opts: StartupOpts) {
         builder = builder.plugin(tauri_plugin_updater::Builder::new().build());
     }
 
-    // Global system hotkey (PrtScn) for the opt-in "screenshot annotate"
-    // feature. The shortcut is NOT registered here — the plugin only installs
-    // the dispatch handler. The frontend calls `set_prtscn_hotkey(true)` when
-    // the user enables the preference, which actually registers PrtScn. On
-    // press we bring the main window to the foreground and notify the WebView,
-    // which reads the clipboard image onto a fresh annotate canvas. Desktop
-    // only (the crate has no mobile backend).
-    #[cfg(not(target_os = "android"))]
-    {
-        use tauri_plugin_global_shortcut::ShortcutState;
-        builder = builder.plugin(
-            tauri_plugin_global_shortcut::Builder::new()
-                .with_handler(|app, _shortcut, event| {
-                    if event.state() == ShortcutState::Pressed {
-                        if let Some(window) = app.get_webview_window("main") {
-                            let _ = window.unminimize();
-                            let _ = window.show();
-                            let _ = window.set_focus();
-                        }
-                        let _ = app.emit("prtscn-screenshot", ());
-                    }
-                })
-                .build(),
-        );
-    }
-
     builder
         .setup(move |app| {
             let diagnostics_path = app
@@ -2824,19 +2370,8 @@ pub fn run(opts: StartupOpts) {
             write_temp_pdf,
             delete_file,
             rename_file,
-            install_virtual_printer,
-            remove_virtual_printer,
-            is_virtual_printer_installed,
-            virtual_printer_collect,
-            virtual_printer_jobs,
-            virtual_printer_delete_job,
-            virtual_printer_catch_enabled,
-            virtual_printer_enable_catch,
             open_pdf_in_default_viewer,
             reveal_in_file_manager,
-            get_printer_spool_dir,
-            list_printer_spool,
-            discard_spool_pdf,
             download_pdf_from_url,
             list_pdf_files,
             save_preferences,
@@ -2875,13 +2410,6 @@ pub fn run(opts: StartupOpts) {
             mcp_app_bridge::mcp_bridge_ready,
             mcp_koppeling::mcp_instellen,
             mcp_koppeling::mcp_status,
-            accounts::accounts_sign_in,
-            accounts::accounts_get_user,
-            accounts::accounts_sign_out,
-            accounts::accounts_fetch,
-            accounts::accounts_upload_file,
-            accounts::accounts_download_file,
-            accounts::accounts_brand_logo,
             email::email_pdf,
             window_mgmt::spawn_window_with_pdf,
             window_mgmt::try_dock_pdf_at_screen,
@@ -2894,7 +2422,6 @@ pub fn run(opts: StartupOpts) {
             startup_diagnostics::startup_diagnostic,
             startup_diagnostics::startup_diagnostics_path,
             read_clipboard_image_png,
-            set_prtscn_hotkey,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

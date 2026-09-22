@@ -8,7 +8,6 @@
     "markup": "Marcatura",
     "behavior": "Comportamento",
     "fileAssociation": "Associazione file",
-    "virtualPrinter": "Stampante virtuale",
     "pageDisplay": "Visualizzazione pagina"
   },
   "resetToDefaults": "Ripristina predefiniti",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "Nome autore",
     "language": "Lingua",
     "interfaceLanguage": "Lingua dell'interfaccia",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "Collegamento IA (MCP)",
     "aiLinkAllow": "Consenti agli assistenti IA (come Claude Desktop) di controllare questa app",
     "aiLinkPort": "Porta",
@@ -140,20 +137,6 @@
     "linuxInstructions": "Per impostare Open PDF Studio come visualizzatore PDF predefinito su Linux:\n\nEseguire nel terminale:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Controllare Finder > Ottieni informazioni",
     "notSet": "Non impostato"
-  },
-  "virtualPrinter": {
-    "title": "Stampante virtuale",
-    "description": "Installa \"Open PDF Studio\" come stampante Windows. Quando si stampa da qualsiasi applicazione (Word, Chrome, Blocco note, ecc.) e si seleziona questa stampante, il PDF generato si aprirà automaticamente in questa applicazione.",
-    "status": "Stato:",
-    "installButton": "Installa stampante virtuale",
-    "removeButton": "Rimuovi stampante virtuale",
-    "installNote": "L'installazione richiede privilegi di amministratore (richiesta UAC). La stampante utilizza il driver integrato \"Microsoft Print to PDF\".",
-    "installing": "Installazione in corso...",
-    "removing": "Rimozione in corso...",
-    "installationFailed": "Installazione non riuscita",
-    "removalFailed": "Rimozione non riuscita",
-    "failedToInstall": "Impossibile installare la stampante virtuale:",
-    "failedToRemove": "Impossibile rimuovere la stampante virtuale:"
   },
   "pageDisplay": {
     "rendering": "Rendering",

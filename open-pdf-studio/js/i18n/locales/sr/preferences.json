@@ -8,7 +8,6 @@
     "markup": "Означавање",
     "behavior": "Понашање",
     "fileAssociation": "Асоцијација фајлова",
-    "virtualPrinter": "Виртуелни штампач",
     "pageDisplay": "Приказ странице"
   },
   "resetToDefaults": "Врати на подразумевано",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "Име аутора",
     "language": "Језик",
     "interfaceLanguage": "Језик интерфејса",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "AI веза (MCP)",
     "aiLinkAllow": "Дозволи AI асистентима (као што је Claude Desktop) да управљају овом апликацијом",
     "aiLinkPort": "Порт",
@@ -157,20 +154,6 @@
     "linuxInstructions": "Да бисте поставили Open PDF Studio као подразумевани PDF прегледач на Linux-у:\n\nПокрените у терминалу:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Проверите Finder > Get Info",
     "notSet": "Није постављено"
-  },
-  "virtualPrinter": {
-    "title": "Виртуелни штампач",
-    "description": "Инсталирајте \"Open PDF Studio\" као Windows штампач. Када штампате из било које апликације (Word, Chrome, Notepad, итд.) и изаберете овај штампач, излазни PDF ће се аутоматски отворити у овој апликацији.",
-    "status": "Статус:",
-    "installButton": "Инсталирај виртуелни штампач",
-    "removeButton": "Уклони виртуелни штампач",
-    "installNote": "Инсталација захтева администраторске привилегије (UAC упит). Штампач користи уграђени \"Microsoft Print to PDF\" драјвер.",
-    "installing": "Инсталирање...",
-    "removing": "Уклањање...",
-    "installationFailed": "Инсталација није успела",
-    "removalFailed": "Уклањање није успело",
-    "failedToInstall": "Неуспешна инсталација виртуелног штампача:",
-    "failedToRemove": "Неуспешно уклањање виртуелног штампача:"
   },
   "pageDisplay": {
     "rendering": "Исцртавање",

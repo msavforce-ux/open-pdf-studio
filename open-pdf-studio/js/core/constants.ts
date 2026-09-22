@@ -269,7 +269,6 @@ export const DEFAULT_PREFERENCES: Preferences = {
 
   // Screenshot annotate: intercept the system PrtScn key as a global hotkey
   // (opt-in; off by default because a global hotkey is intrusive).
-  interceptPrintScreen: false,
 
   // AI-koppeling (MCP): standaard uit — aanzetten is een bewuste keuze, want
   // daarmee kan een programma op deze computer de app bedienen.

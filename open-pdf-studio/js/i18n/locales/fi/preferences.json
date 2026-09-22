@@ -8,7 +8,6 @@
     "markup": "Merkintä",
     "behavior": "Toiminta",
     "fileAssociation": "Tiedostoyhteys",
-    "virtualPrinter": "Virtuaalitulostin",
     "pageDisplay": "Sivun näyttö"
   },
   "resetToDefaults": "Palauta oletukset",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "Tekijän nimi",
     "language": "Kieli",
     "interfaceLanguage": "Käyttöliittymän kieli",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "Tekoälyliitäntä (MCP)",
     "aiLinkAllow": "Salli tekoälyavustajien (kuten Claude Desktop) käyttää tätä sovellusta",
     "aiLinkPort": "Portti",
@@ -157,20 +154,6 @@
     "linuxInstructions": "Aseta Open PDF Studio oletus-PDF-katseluohjelmaksi Linuxissa:\n\nSuorita terminaalissa:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Tarkista Finder > Hae tietoja",
     "notSet": "Ei asetettu"
-  },
-  "virtualPrinter": {
-    "title": "Virtuaalitulostin",
-    "description": "Asenna \"Open PDF Studio\" Windows-tulostimeksi. Kun tulostat mistä tahansa sovelluksesta (Word, Chrome, Muistio jne.) ja valitset tämän tulostimen, tulostettava PDF avautuu automaattisesti tässä sovelluksessa.",
-    "status": "Tila:",
-    "installButton": "Asenna virtuaalitulostin",
-    "removeButton": "Poista virtuaalitulostin",
-    "installNote": "Asennus vaatii järjestelmänvalvojan oikeudet (UAC-kehote). Tulostin käyttää sisäänrakennettua \"Microsoft Print to PDF\" -ohjainta.",
-    "installing": "Asennetaan...",
-    "removing": "Poistetaan...",
-    "installationFailed": "Asennus epäonnistui",
-    "removalFailed": "Poistaminen epäonnistui",
-    "failedToInstall": "Virtuaalitulostimen asennus epäonnistui:",
-    "failedToRemove": "Virtuaalitulostimen poistaminen epäonnistui:"
   },
   "pageDisplay": {
     "rendering": "Renderöinti",

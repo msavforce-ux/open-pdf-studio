@@ -1,6 +1,6 @@
 [package]
 name = "open-pdf-studio"
-version = "2.8.0"
+version = "2.9.0"
 description = "A free, open-source PDF annotation editor"
 authors = ["OpenAEC Foundation"]
 license = "LGPL-3.0-or-later"
@@ -53,9 +53,6 @@ image = { version = "0.25", default-features = false, features = ["jpeg", "png"]
 pdfium-render = { version = "0.9", features = ["thread_safe", "image_025"] }
 clap = { version = "4", features = ["derive"] }
 
-# OpenAEC Accounts ("Sign in with OpenAEC", accounts.rs): PKCE + OS-keyring
-# token storage + multipart uploads to the Accounts API.
-keyring = { version = "3", features = ["windows-native"] }
 sha2 = { version = "0.10", features = ["oid"] }
 # Digitale handtekeningen (#374): RustCrypto op de der 0.7-lijn. pkcs12 0.1,
 # cms 0.2 en x509-cert 0.2 hangen daar zelf aan; niet mengen met der 0.8.
@@ -136,10 +133,6 @@ tauri-plugin-updater = "2"
 # Drag-out window detach — desktop only (the crate has no mobile platform
 # backend and fails to compile for Android/iOS).
 tauri-plugin-drag = "2.1.1"
-# Global system hotkey (PrtScn) for the opt-in screenshot-annotate feature.
-# Desktop only.
-tauri-plugin-global-shortcut = "2"
-
 # Rootarchief van het besturingssysteem als DER buiten Windows (macOS-sleutelhanger,
 # OpenSSL-paden op Linux). Staat al in Cargo.lock; geen eigen X.509-lijn.
 [target.'cfg(not(windows))'.dependencies]

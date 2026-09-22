@@ -8,7 +8,6 @@
     "markup": "Markup",
     "behavior": "Behavior",
     "fileAssociation": "File Association",
-    "virtualPrinter": "Virtual Printer",
     "pageDisplay": "Page Display"
   },
   "resetToDefaults": "Reset to Defaults",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "Author Name",
     "language": "Language",
     "interfaceLanguage": "Interface Language",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "AI link (MCP)",
     "aiLinkAllow": "Allow AI assistants (such as Claude Desktop) to operate this app",
     "aiLinkPort": "Port",
@@ -216,22 +213,5 @@
     "linuxInstructions": "To set Open PDF Studio as default PDF viewer on Linux:\n\nRun in terminal:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Check Finder > Get Info",
     "notSet": "Not set"
-  },
-  "virtualPrinter": {
-    "title": "Virtual Printer",
-    "description": "Install \"Open PDF Studio\" as a Windows printer. When you print from any application (Word, Chrome, Notepad, etc.) and select this printer, the output PDF will open automatically in this app.",
-    "status": "Status:",
-    "installButton": "Install Virtual Printer",
-    "removeButton": "Remove Virtual Printer",
-    "enableCatch": "Enable PDF catch (no Save dialog)",
-    "catchActive": "Installed — PDF catch active",
-    "saveDialogMode": "Installed — still shows a Save dialog",
-    "installNote": "Installation requires administrator privileges (UAC prompt). The printer uses the built-in \"Microsoft Print to PDF\" driver. Printing to it from any app catches the PDF in this app's merge window instead of saving immediately.",
-    "installing": "Installing...",
-    "removing": "Removing...",
-    "installationFailed": "Installation failed",
-    "removalFailed": "Removal failed",
-    "failedToInstall": "Failed to install virtual printer:",
-    "failedToRemove": "Failed to remove virtual printer:"
   }
 }

@@ -208,7 +208,6 @@ export interface Preferences {
   readerMode: boolean;
 
   // Screenshot annotate: intercept the system PrtScn key as a global hotkey
-  interceptPrintScreen: boolean;
 
   // AI-koppeling: lokale MCP-server voor AI-assistenten (Claude Desktop e.d.)
   mcpEnabled: boolean;

@@ -195,19 +195,6 @@ async function init() {
   import('./core/app-version.js').then((m) => m.initDevVersionSync()).catch(() => {});
   const mobile = isMobile();
 
-  // STANDALONE PRINT-QUEUE WINDOW (?view=printqueue): a separate Tauri window
-  // opened by the print-catch watcher. Renders ONLY the catch/merge UI — no
-  // ribbon, no document workspace, no worker pool usage — so it works as its
-  // own window beside the main app instead of as an integrated dialog.
-  if (new URLSearchParams(location.search).get('view') === 'printqueue') {
-    if (!mobile) disableDefaultContextMenu();
-    try { await loadPreferences(); } catch (_) {}
-    const { default: PrintQueueWindow } = await import('./solid/components/PrintQueueWindow.jsx');
-    render(() => PrintQueueWindow(), document.getElementById('app-root'));
-    recordStartupDiagnostic('frontend-ready');
-    return;
-  }
-
   // Disable context menu on desktop only (long-press is expected on mobile)
   if (!mobile) {
     disableDefaultContextMenu();
@@ -259,12 +246,6 @@ async function init() {
   // Load installed plugins (extension palettes, custom annotation types, etc.)
   initPlugins();
 
-  // Screenshot-annotate mode: wire the PrtScn hotkey event and apply the
-  // (opt-in) preference. No-op outside Tauri. Lazy so it never blocks startup.
-  import('./tools/screenshot-annotate.js')
-    .then(m => m.initScreenshotAnnotate())
-    .catch(() => {});
-
   // Wire the MCP <-> WebView bridge early. The bridge is just
   // event-listener registration on window.__TAURI__.event — it does not need
   // the window to be visible or DOM-ready. Wiring it here means the in-process
@@ -272,15 +253,8 @@ async function init() {
   // Inert outside Tauri.
   initMcpBridge().catch(e => console.warn('initMcpBridge failed:', e));
 
-  // "Open PDF Printer" job queue: watch the spool so prints from ANY
-  // application pop the in-app sort/merge dialog. No-op when the virtual
-  // printer isn't installed.
-  import('./solid/stores/printQueueStore.js')
-    .then(m => m.startPrintQueueWatcher())
-    .catch(() => {});
-
   // Lazy-load printer enumeration so the print dialog shows the OS default
-  // printer instantly (Ctrl+P) instead of waiting on PowerShell/lpstat.
+  // printer instantly (Ctrl+P) instead of waiting on the OS printer enumeration.
   import('./solid/stores/printerStore.js')
     .then(m => m.loadPrinters())
     .catch(() => {});

@@ -8,7 +8,6 @@
     "markup": "Marcação",
     "behavior": "Comportamento",
     "fileAssociation": "Associação de arquivos",
-    "virtualPrinter": "Impressora virtual",
     "pageDisplay": "Exibição de página"
   },
   "resetToDefaults": "Redefinir para os padrões",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "Nome do autor",
     "language": "Idioma",
     "interfaceLanguage": "Idioma da interface",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "Ligação de IA (MCP)",
     "aiLinkAllow": "Permitir que assistentes de IA (como o Claude Desktop) controlem esta aplicação",
     "aiLinkPort": "Porta",
@@ -140,20 +137,6 @@
     "linuxInstructions": "Para definir o Open PDF Studio como visualizador PDF padrão no Linux:\n\nExecute no terminal:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Verificar Finder > Obter Informações",
     "notSet": "Não definido"
-  },
-  "virtualPrinter": {
-    "title": "Impressora virtual",
-    "description": "Instale o \"Open PDF Studio\" como uma impressora do Windows. Quando você imprimir de qualquer aplicativo (Word, Chrome, Bloco de Notas, etc.) e selecionar esta impressora, o PDF gerado será aberto automaticamente neste aplicativo.",
-    "status": "Status:",
-    "installButton": "Instalar impressora virtual",
-    "removeButton": "Remover impressora virtual",
-    "installNote": "A instalação requer privilégios de administrador (solicitação UAC). A impressora utiliza o driver integrado \"Microsoft Print to PDF\".",
-    "installing": "Instalando...",
-    "removing": "Removendo...",
-    "installationFailed": "A instalação falhou",
-    "removalFailed": "A remoção falhou",
-    "failedToInstall": "Falha ao instalar a impressora virtual:",
-    "failedToRemove": "Falha ao remover a impressora virtual:"
   },
   "pageDisplay": {
     "rendering": "Renderização",

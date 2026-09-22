@@ -8,7 +8,6 @@
     "markup": "Markierung",
     "behavior": "Verhalten",
     "fileAssociation": "Dateizuordnung",
-    "virtualPrinter": "Virtueller Drucker",
     "pageDisplay": "Seitenanzeige"
   },
   "resetToDefaults": "Standardwerte wiederherstellen",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "Autorname",
     "language": "Sprache",
     "interfaceLanguage": "Oberflächensprache",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "KI-Anbindung (MCP)",
     "aiLinkAllow": "KI-Assistenten (z. B. Claude Desktop) die Bedienung dieser App erlauben",
     "aiLinkPort": "Port",
@@ -140,20 +137,6 @@
     "linuxInstructions": "Um Open PDF Studio als Standard-PDF-Betrachter auf Linux festzulegen:\n\nFühren Sie im Terminal aus:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Überprüfen Sie Finder > Informationen",
     "notSet": "Nicht festgelegt"
-  },
-  "virtualPrinter": {
-    "title": "Virtueller Drucker",
-    "description": "Installieren Sie „Open PDF Studio“ als Windows-Drucker. Wenn Sie aus einer Anwendung drucken (Word, Chrome, Editor usw.) und diesen Drucker auswählen, wird die erzeugte PDF automatisch in dieser App geöffnet.",
-    "status": "Status:",
-    "installButton": "Virtuellen Drucker installieren",
-    "removeButton": "Virtuellen Drucker entfernen",
-    "installNote": "Die Installation erfordert Administratorrechte (UAC-Abfrage). Der Drucker verwendet den integrierten „Microsoft Print to PDF“-Treiber.",
-    "installing": "Wird installiert...",
-    "removing": "Wird entfernt...",
-    "installationFailed": "Installation fehlgeschlagen",
-    "removalFailed": "Entfernung fehlgeschlagen",
-    "failedToInstall": "Virtueller Drucker konnte nicht installiert werden:",
-    "failedToRemove": "Virtueller Drucker konnte nicht entfernt werden:"
   },
   "pageDisplay": {
     "rendering": "Darstellung",

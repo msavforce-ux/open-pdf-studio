@@ -8,7 +8,6 @@
     "markup": "Разметка",
     "behavior": "Поведение",
     "fileAssociation": "Ассоциация файлов",
-    "virtualPrinter": "Виртуальный принтер",
     "pageDisplay": "Отображение страницы"
   },
   "resetToDefaults": "Сбросить по умолчанию",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "Имя автора",
     "language": "Язык",
     "interfaceLanguage": "Язык интерфейса",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "Связь с ИИ (MCP)",
     "aiLinkAllow": "Разрешить ИИ-ассистентам (например, Claude Desktop) управлять этим приложением",
     "aiLinkPort": "Порт",
@@ -157,20 +154,6 @@
     "linuxInstructions": "Чтобы установить Open PDF Studio как средство просмотра PDF по умолчанию в Linux:\n\nВыполните в терминале:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Проверьте Finder > Свойства",
     "notSet": "Не установлено"
-  },
-  "virtualPrinter": {
-    "title": "Виртуальный принтер",
-    "description": "Установите \"Open PDF Studio\" как принтер Windows. При печати из любого приложения (Word, Chrome, Блокнот и др.) с выбором этого принтера, выходной PDF автоматически откроется в этом приложении.",
-    "status": "Состояние:",
-    "installButton": "Установить виртуальный принтер",
-    "removeButton": "Удалить виртуальный принтер",
-    "installNote": "Для установки требуются права администратора (запрос UAC). Принтер использует встроенный драйвер \"Microsoft Print to PDF\".",
-    "installing": "Установка...",
-    "removing": "Удаление...",
-    "installationFailed": "Ошибка установки",
-    "removalFailed": "Ошибка удаления",
-    "failedToInstall": "Не удалось установить виртуальный принтер:",
-    "failedToRemove": "Не удалось удалить виртуальный принтер:"
   },
   "pageDisplay": {
     "rendering": "Отрисовка",

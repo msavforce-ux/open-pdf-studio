@@ -8,7 +8,6 @@
     "markup": "نشانه‌گذاری",
     "behavior": "رفتار",
     "fileAssociation": "اقتران فایل",
-    "virtualPrinter": "چاپگر مجازی",
     "pageDisplay": "نمایش صفحه"
   },
   "resetToDefaults": "بازنشانی به پیش‌فرض",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "نام نویسنده",
     "language": "زبان",
     "interfaceLanguage": "زبان رابط کاربری",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "اتصال هوش مصنوعی (MCP)",
     "aiLinkAllow": "اجازه به دستیارهای هوش مصنوعی (مانند Claude Desktop) برای کار با این برنامه",
     "aiLinkPort": "درگاه",
@@ -140,20 +137,6 @@
     "linuxInstructions": "برای تنظیم Open PDF Studio به عنوان نمایشگر PDF پیش‌فرض در Linux:\n\nدر ترمینال اجرا کنید:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "بررسی Finder > دریافت اطلاعات",
     "notSet": "تنظیم نشده"
-  },
-  "virtualPrinter": {
-    "title": "چاپگر مجازی",
-    "description": "نصب \"Open PDF Studio\" به عنوان یک چاپگر در Windows. هنگام چاپ از هر برنامه‌ای (Word، Chrome، Notepad و غیره) و انتخاب این چاپگر، فایل PDF خروجی به صورت خودکار در این برنامه باز می‌شود.",
-    "status": "وضعیت:",
-    "installButton": "نصب چاپگر مجازی",
-    "removeButton": "حذف چاپگر مجازی",
-    "installNote": "نصب نیاز به دسترسی مدیر (درخواست UAC) دارد. چاپگر از درایور داخلی \"Microsoft Print to PDF\" استفاده می‌کند.",
-    "installing": "در حال نصب...",
-    "removing": "در حال حذف...",
-    "installationFailed": "نصب ناموفق بود",
-    "removalFailed": "حذف ناموفق بود",
-    "failedToInstall": "نصب چاپگر مجازی ناموفق بود:",
-    "failedToRemove": "حذف چاپگر مجازی ناموفق بود:"
   },
   "pageDisplay": {
     "rendering": "رندر",

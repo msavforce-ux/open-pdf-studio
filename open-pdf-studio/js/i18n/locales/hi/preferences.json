@@ -8,7 +8,6 @@
     "markup": "मार्कअप",
     "behavior": "व्यवहार",
     "fileAssociation": "फ़ाइल संबद्धता",
-    "virtualPrinter": "वर्चुअल प्रिंटर",
     "pageDisplay": "पृष्ठ प्रदर्शन"
   },
   "resetToDefaults": "डिफ़ॉल्ट पर रीसेट करें",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "लेखक का नाम",
     "language": "भाषा",
     "interfaceLanguage": "इंटरफ़ेस भाषा",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "एआई लिंक (MCP)",
     "aiLinkAllow": "एआई सहायकों (जैसे Claude Desktop) को यह ऐप चलाने की अनुमति दें",
     "aiLinkPort": "पोर्ट",
@@ -157,20 +154,6 @@
     "linuxInstructions": "Linux पर Open PDF Studio को डिफ़ॉल्ट PDF व्यूअर के रूप में सेट करने के लिए:\n\nटर्मिनल में चलाएं:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Finder > जानकारी प्राप्त करें जांचें",
     "notSet": "सेट नहीं है"
-  },
-  "virtualPrinter": {
-    "title": "वर्चुअल प्रिंटर",
-    "description": "\"Open PDF Studio\" को Windows प्रिंटर के रूप में स्थापित करें। जब आप किसी भी एप्लिकेशन (Word, Chrome, Notepad, आदि) से प्रिंट करें और इस प्रिंटर को चुनें, तो आउटपुट PDF स्वचालित रूप से इस ऐप में खुलेगा।",
-    "status": "स्थिति:",
-    "installButton": "वर्चुअल प्रिंटर स्थापित करें",
-    "removeButton": "वर्चुअल प्रिंटर हटाएं",
-    "installNote": "स्थापना के लिए व्यवस्थापक विशेषाधिकार (UAC प्रॉम्प्ट) आवश्यक हैं। प्रिंटर अंतर्निहित \"Microsoft Print to PDF\" ड्राइवर का उपयोग करता है।",
-    "installing": "स्थापित हो रहा है...",
-    "removing": "हटाया जा रहा है...",
-    "installationFailed": "स्थापना विफल",
-    "removalFailed": "हटाना विफल",
-    "failedToInstall": "वर्चुअल प्रिंटर स्थापित करने में विफल:",
-    "failedToRemove": "वर्चुअल प्रिंटर हटाने में विफल:"
   },
   "pageDisplay": {
     "rendering": "रेंडरिंग",

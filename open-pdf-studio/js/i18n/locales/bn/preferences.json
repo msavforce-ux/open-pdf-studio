@@ -8,7 +8,6 @@
     "markup": "মার্কআপ",
     "behavior": "আচরণ",
     "fileAssociation": "ফাইল সংযুক্তি",
-    "virtualPrinter": "ভার্চুয়াল প্রিন্টার",
     "pageDisplay": "পৃষ্ঠা প্রদর্শন"
   },
   "resetToDefaults": "ডিফল্টে পুনরায় সেট করুন",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "লেখকের নাম",
     "language": "ভাষা",
     "interfaceLanguage": "ইন্টারফেস ভাষা",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "এআই সংযোগ (MCP)",
     "aiLinkAllow": "এআই সহকারীদের (যেমন Claude Desktop) এই অ্যাপ চালানোর অনুমতি দিন",
     "aiLinkPort": "পোর্ট",
@@ -157,20 +154,6 @@
     "linuxInstructions": "লিনাক্সে Open PDF Studio কে ডিফল্ট PDF ভিউয়ার হিসেবে সেট করতে:\n\nটার্মিনালে চালান:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "ফাইন্ডার > তথ্য পান দেখুন",
     "notSet": "সেট করা নেই"
-  },
-  "virtualPrinter": {
-    "title": "ভার্চুয়াল প্রিন্টার",
-    "description": "\"Open PDF Studio\" কে একটি উইন্ডোজ প্রিন্টার হিসেবে ইনস্টল করুন। আপনি যখন যেকোনো অ্যাপ্লিকেশন (Word, Chrome, Notepad, ইত্যাদি) থেকে মুদ্রণ করবেন এবং এই প্রিন্টারটি নির্বাচন করবেন, তখন আউটপুট PDF স্বয়ংক্রিয়ভাবে এই অ্যাপে খুলবে।",
-    "status": "স্থিতি:",
-    "installButton": "ভার্চুয়াল প্রিন্টার ইনস্টল করুন",
-    "removeButton": "ভার্চুয়াল প্রিন্টার সরান",
-    "installNote": "ইনস্টলেশনের জন্য প্রশাসক অধিকার (UAC প্রম্পট) প্রয়োজন। প্রিন্টারটি বিল্ট-ইন \"Microsoft Print to PDF\" ড্রাইভার ব্যবহার করে।",
-    "installing": "ইনস্টল করা হচ্ছে...",
-    "removing": "সরানো হচ্ছে...",
-    "installationFailed": "ইনস্টলেশন ব্যর্থ হয়েছে",
-    "removalFailed": "সরানো ব্যর্থ হয়েছে",
-    "failedToInstall": "ভার্চুয়াল প্রিন্টার ইনস্টল করতে ব্যর্থ:",
-    "failedToRemove": "ভার্চুয়াল প্রিন্টার সরাতে ব্যর্থ:"
   },
   "pageDisplay": {
     "rendering": "রেন্ডারিং",

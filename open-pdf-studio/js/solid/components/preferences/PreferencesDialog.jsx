@@ -12,9 +12,8 @@ import AnnotationsTab from './AnnotationsTab.jsx';
 import BehaviorTab from './BehaviorTab.jsx';
 import PageDisplayTab from './PageDisplayTab.jsx';
 import FileAssocTab from './FileAssocTab.jsx';
-import VirtualPrinterTab from './VirtualPrinterTab.jsx';
 
-const DESKTOP_ONLY_TABS = ['fileassoc', 'vprinter'];
+const DESKTOP_ONLY_TABS = ['fileassoc'];
 
 const TAB_IDS = [
   { id: 'general', key: 'tabs.general' },
@@ -22,7 +21,6 @@ const TAB_IDS = [
   { id: 'behavior', key: 'tabs.behavior' },
   { id: 'pageDisplay', key: 'tabs.pageDisplay' },
   { id: 'fileassoc', key: 'tabs.fileAssociation' },
-  { id: 'vprinter', key: 'tabs.virtualPrinter' },
 ];
 
 const TAB_ICONS = {
@@ -49,11 +47,6 @@ const TAB_ICONS = {
   pageDisplay: (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <rect x="3" y="3" width="18" height="18" rx="1"/><path d="M7 8h10M7 12h10M7 16h10"/>
-    </svg>
-  ),
-  vprinter: (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
     </svg>
   ),
 };
@@ -177,9 +170,6 @@ export default function PreferencesDialog(props) {
             </Match>
             <Match when={activeTab() === 'fileassoc'}>
               <FileAssocTab />
-            </Match>
-            <Match when={activeTab() === 'vprinter'}>
-              <VirtualPrinterTab />
             </Match>
           </Switch>
         </div>

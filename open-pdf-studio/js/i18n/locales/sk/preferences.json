@@ -8,7 +8,6 @@
     "markup": "Označenia",
     "behavior": "Správanie",
     "fileAssociation": "Priradenie súborov",
-    "virtualPrinter": "Virtuálna tlačiareň",
     "pageDisplay": "Zobrazenie stránky"
   },
   "resetToDefaults": "Obnoviť predvolené",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "Meno autora",
     "language": "Jazyk",
     "interfaceLanguage": "Jazyk rozhrania",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "Prepojenie s AI (MCP)",
     "aiLinkAllow": "Povoliť asistentom AI (napr. Claude Desktop) ovládať túto aplikáciu",
     "aiLinkPort": "Port",
@@ -157,20 +154,6 @@
     "linuxInstructions": "Na nastavenie Open PDF Studio ako predvoleného PDF prehliadača na Linuxe:\n\nSpustite v termináli:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Skontrolujte Finder > Informácie",
     "notSet": "Nenastavené"
-  },
-  "virtualPrinter": {
-    "title": "Virtuálna tlačiareň",
-    "description": "Nainštalujte \"Open PDF Studio\" ako tlačiareň systému Windows. Keď tlačíte z ľubovoľnej aplikácie (Word, Chrome, Poznámkový blok atď.) a vyberiete túto tlačiareň, výstupný PDF sa automaticky otvorí v tejto aplikácii.",
-    "status": "Stav:",
-    "installButton": "Nainštalovať virtuálnu tlačiareň",
-    "removeButton": "Odstrániť virtuálnu tlačiareň",
-    "installNote": "Inštalácia vyžaduje oprávnenia správcu (výzva UAC). Tlačiareň používa vstavaný ovládač \"Microsoft Print to PDF\".",
-    "installing": "Inštaluje sa...",
-    "removing": "Odstraňuje sa...",
-    "installationFailed": "Inštalácia zlyhala",
-    "removalFailed": "Odstránenie zlyhalo",
-    "failedToInstall": "Nepodarilo sa nainštalovať virtuálnu tlačiareň:",
-    "failedToRemove": "Nepodarilo sa odstrániť virtuálnu tlačiareň:"
   },
   "pageDisplay": {
     "rendering": "Vykresľovanie",

@@ -8,7 +8,6 @@
     "markup": "마크업",
     "behavior": "동작",
     "fileAssociation": "파일 연결",
-    "virtualPrinter": "가상 프린터",
     "pageDisplay": "페이지 표시"
   },
   "resetToDefaults": "기본값으로 초기화",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "작성자 이름",
     "language": "언어",
     "interfaceLanguage": "인터페이스 언어",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "AI 연결 (MCP)",
     "aiLinkAllow": "AI 도우미(Claude Desktop 등)가 이 앱을 조작하도록 허용",
     "aiLinkPort": "포트",
@@ -140,20 +137,6 @@
     "linuxInstructions": "Linux에서 Open PDF Studio를 기본 PDF 뷰어로 설정하려면:\n\n터미널에서 실행:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Finder > 정보 가져오기 확인",
     "notSet": "설정되지 않음"
-  },
-  "virtualPrinter": {
-    "title": "가상 프린터",
-    "description": "\"Open PDF Studio\"를 Windows 프린터로 설치합니다. 아무 응용 프로그램(Word, Chrome, 메모장 등)에서 인쇄할 때 이 프린터를 선택하면 출력된 PDF가 이 앱에서 자동으로 열립니다.",
-    "status": "상태:",
-    "installButton": "가상 프린터 설치",
-    "removeButton": "가상 프린터 제거",
-    "installNote": "설치에는 관리자 권한(UAC 프롬프트)이 필요합니다. 프린터는 내장된 \"Microsoft Print to PDF\" 드라이버를 사용합니다.",
-    "installing": "설치 중...",
-    "removing": "제거 중...",
-    "installationFailed": "설치 실패",
-    "removalFailed": "제거 실패",
-    "failedToInstall": "가상 프린터를 설치하지 못했습니다:",
-    "failedToRemove": "가상 프린터를 제거하지 못했습니다:"
   },
   "pageDisplay": {
     "rendering": "렌더링",

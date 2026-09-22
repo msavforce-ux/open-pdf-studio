@@ -8,7 +8,6 @@
     "markup": "Marcaj",
     "behavior": "Comportament",
     "fileAssociation": "Asociere fisiere",
-    "virtualPrinter": "Imprimanta virtuala",
     "pageDisplay": "Afișare pagină"
   },
   "resetToDefaults": "Resetare la valori implicite",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "Nume autor",
     "language": "Limba",
     "interfaceLanguage": "Limba interfetei",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "Conexiune AI (MCP)",
     "aiLinkAllow": "Permite asistenților AI (precum Claude Desktop) să controleze această aplicație",
     "aiLinkPort": "Port",
@@ -157,20 +154,6 @@
     "linuxInstructions": "Pentru a seta Open PDF Studio ca vizualizator PDF implicit pe Linux:\n\nRulati in terminal:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Verificati Finder > Informatii",
     "notSet": "Nesetat"
-  },
-  "virtualPrinter": {
-    "title": "Imprimanta virtuala",
-    "description": "Instalati \"Open PDF Studio\" ca imprimanta Windows. Cand tipariti din orice aplicatie (Word, Chrome, Notepad, etc.) si selectati aceasta imprimanta, fisierul PDF rezultat se va deschide automat in aceasta aplicatie.",
-    "status": "Stare:",
-    "installButton": "Instalare imprimanta virtuala",
-    "removeButton": "Eliminare imprimanta virtuala",
-    "installNote": "Instalarea necesita privilegii de administrator (solicitare UAC). Imprimanta foloseste driverul incorporat \"Microsoft Print to PDF\".",
-    "installing": "Se instaleaza...",
-    "removing": "Se elimina...",
-    "installationFailed": "Instalarea a esuat",
-    "removalFailed": "Eliminarea a esuat",
-    "failedToInstall": "Nu s-a putut instala imprimanta virtuala:",
-    "failedToRemove": "Nu s-a putut elimina imprimanta virtuala:"
   },
   "pageDisplay": {
     "rendering": "Randare",

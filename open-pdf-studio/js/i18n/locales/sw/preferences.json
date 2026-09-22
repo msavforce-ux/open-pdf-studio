@@ -8,7 +8,6 @@
     "markup": "Alama",
     "behavior": "Tabia",
     "fileAssociation": "Ushirikiano wa Faili",
-    "virtualPrinter": "Printa Pepe",
     "pageDisplay": "Onyesho la Ukurasa"
   },
   "resetToDefaults": "Weka Upya Chaguo-msingi",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "Jina la Mwandishi",
     "language": "Lugha",
     "interfaceLanguage": "Lugha ya Kiolesura",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "Muunganisho wa AI (MCP)",
     "aiLinkAllow": "Ruhusu wasaidizi wa AI (kama Claude Desktop) kuendesha programu hii",
     "aiLinkPort": "Mlango",
@@ -157,20 +154,6 @@
     "linuxInstructions": "Ili kuweka Open PDF Studio kama kitazamaji chaguo-msingi cha PDF kwenye Linux:\n\nEndesha kwenye terminali:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Angalia Finder > Pata Taarifa",
     "notSet": "Haijawekwa"
-  },
-  "virtualPrinter": {
-    "title": "Printa Pepe",
-    "description": "Weka \"Open PDF Studio\" kama printa ya Windows. Unapochapisha kutoka programu yoyote (Word, Chrome, Notepad, n.k.) na kuchagua printa hii, PDF inayotoka itafunguka kiotomatiki kwenye programu hii.",
-    "status": "Hali:",
-    "installButton": "Weka Printa Pepe",
-    "removeButton": "Ondoa Printa Pepe",
-    "installNote": "Uwekaji unahitaji haki za msimamizi (UAC). Printa inatumia dereva iliyojengwa ndani ya \"Microsoft Print to PDF\".",
-    "installing": "Inaweka...",
-    "removing": "Inaondoa...",
-    "installationFailed": "Uwekaji umeshindwa",
-    "removalFailed": "Uondoaji umeshindwa",
-    "failedToInstall": "Imeshindwa kuweka printa pepe:",
-    "failedToRemove": "Imeshindwa kuondoa printa pepe:"
   },
   "pageDisplay": {
     "rendering": "Uonyeshaji",

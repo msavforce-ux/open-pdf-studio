@@ -8,7 +8,6 @@
     "markup": "标记",
     "behavior": "行为",
     "fileAssociation": "文件关联",
-    "virtualPrinter": "虚拟打印机",
     "pageDisplay": "页面显示"
   },
   "resetToDefaults": "恢复默认设置",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "作者姓名",
     "language": "语言",
     "interfaceLanguage": "界面语言",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "AI 连接（MCP）",
     "aiLinkAllow": "允许 AI 助手（如 Claude Desktop）操作此应用",
     "aiLinkPort": "端口",
@@ -140,20 +137,6 @@
     "linuxInstructions": "在 Linux 上将 Open PDF Studio 设为默认 PDF 查看器：\n\n在终端中运行：\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "检查 Finder > 显示简介",
     "notSet": "未设置"
-  },
-  "virtualPrinter": {
-    "title": "虚拟打印机",
-    "description": "将“Open PDF Studio”安装为 Windows 打印机。当您从任何应用程序（Word、Chrome、记事本等）打印并选择此打印机时，输出的 PDF 将自动在此应用中打开。",
-    "status": "状态：",
-    "installButton": "安装虚拟打印机",
-    "removeButton": "移除虚拟打印机",
-    "installNote": "安装需要管理员权限（UAC 提示）。打印机使用内置的“Microsoft Print to PDF”驱动程序。",
-    "installing": "正在安装...",
-    "removing": "正在移除...",
-    "installationFailed": "安装失败",
-    "removalFailed": "移除失败",
-    "failedToInstall": "无法安装虚拟打印机：",
-    "failedToRemove": "无法移除虚拟打印机："
   },
   "pageDisplay": {
     "rendering": "渲染",

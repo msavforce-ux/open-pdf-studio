@@ -8,7 +8,6 @@
     "markup": "Markering",
     "behavior": "Adfærd",
     "fileAssociation": "Filtilknytning",
-    "virtualPrinter": "Virtuel printer",
     "pageDisplay": "Sidevisning"
   },
   "resetToDefaults": "Nulstil til standarder",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "Forfatternavn",
     "language": "Sprog",
     "interfaceLanguage": "Brugerfladesprog",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "AI-forbindelse (MCP)",
     "aiLinkAllow": "Tillad AI-assistenter (som Claude Desktop) at betjene denne app",
     "aiLinkPort": "Port",
@@ -157,20 +154,6 @@
     "linuxInstructions": "For at angive Open PDF Studio som standard PDF-fremviser på Linux:\n\nKør i terminal:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Tjek Finder > Vis info",
     "notSet": "Ikke angivet"
-  },
-  "virtualPrinter": {
-    "title": "Virtuel printer",
-    "description": "Installer \"Open PDF Studio\" som en Windows-printer. Når du udskriver fra et hvilket som helst program (Word, Chrome, Notesblok osv.) og vælger denne printer, åbnes den genererede PDF automatisk i dette program.",
-    "status": "Status:",
-    "installButton": "Installer virtuel printer",
-    "removeButton": "Fjern virtuel printer",
-    "installNote": "Installation kræver administratorrettigheder (UAC-prompt). Printeren bruger den indbyggede \"Microsoft Print to PDF\"-driver.",
-    "installing": "Installerer...",
-    "removing": "Fjerner...",
-    "installationFailed": "Installation mislykkedes",
-    "removalFailed": "Fjernelse mislykkedes",
-    "failedToInstall": "Kunne ikke installere virtuel printer:",
-    "failedToRemove": "Kunne ikke fjerne virtuel printer:"
   },
   "pageDisplay": {
     "rendering": "Gengivelse",

@@ -8,7 +8,6 @@
     "markup": "Marquage",
     "behavior": "Comportement",
     "fileAssociation": "Association de fichiers",
-    "virtualPrinter": "Imprimante virtuelle",
     "pageDisplay": "Affichage de page"
   },
   "resetToDefaults": "Rétablir les valeurs par défaut",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "Nom d'auteur",
     "language": "Langue",
     "interfaceLanguage": "Langue de l'interface",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "Connexion IA (MCP)",
     "aiLinkAllow": "Autoriser les assistants IA (comme Claude Desktop) à piloter cette application",
     "aiLinkPort": "Port",
@@ -140,20 +137,6 @@
     "linuxInstructions": "Pour définir Open PDF Studio comme visionneuse PDF par défaut sur Linux :\n\nExécutez dans le terminal :\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Vérifiez Finder > Lire les informations",
     "notSet": "Non défini"
-  },
-  "virtualPrinter": {
-    "title": "Imprimante virtuelle",
-    "description": "Installez « Open PDF Studio » comme imprimante Windows. Lorsque vous imprimez depuis une application (Word, Chrome, Bloc-notes, etc.) et sélectionnez cette imprimante, le PDF généré s'ouvrira automatiquement dans cette application.",
-    "status": "Statut :",
-    "installButton": "Installer l'imprimante virtuelle",
-    "removeButton": "Supprimer l'imprimante virtuelle",
-    "installNote": "L'installation nécessite des privilèges administrateur (invite UAC). L'imprimante utilise le pilote intégré « Microsoft Print to PDF ».",
-    "installing": "Installation...",
-    "removing": "Suppression...",
-    "installationFailed": "L'installation a échoué",
-    "removalFailed": "La suppression a échoué",
-    "failedToInstall": "Impossible d'installer l'imprimante virtuelle :",
-    "failedToRemove": "Impossible de supprimer l'imprimante virtuelle :"
   },
   "pageDisplay": {
     "rendering": "Rendu",

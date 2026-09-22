@@ -8,7 +8,6 @@
     "markup": "Markering",
     "behavior": "Oppførsel",
     "fileAssociation": "Filtilknytning",
-    "virtualPrinter": "Virtuell skriver",
     "pageDisplay": "Sidevisning"
   },
   "resetToDefaults": "Tilbakestill til standardverdier",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "Forfatternavn",
     "language": "Språk",
     "interfaceLanguage": "Grensesnittspråk",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "AI-kobling (MCP)",
     "aiLinkAllow": "Tillat AI-assistenter (som Claude Desktop) å betjene denne appen",
     "aiLinkPort": "Port",
@@ -157,20 +154,6 @@
     "linuxInstructions": "For å angi Open PDF Studio som standard PDF-leser på Linux:\n\nKjør i terminal:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Sjekk Finder > Vis info",
     "notSet": "Ikke angitt"
-  },
-  "virtualPrinter": {
-    "title": "Virtuell skriver",
-    "description": "Installer \"Open PDF Studio\" som en Windows-skriver. Når du skriver ut fra et program (Word, Chrome, Notisblokk osv.) og velger denne skriveren, åpnes PDF-en automatisk i dette programmet.",
-    "status": "Status:",
-    "installButton": "Installer virtuell skriver",
-    "removeButton": "Fjern virtuell skriver",
-    "installNote": "Installasjon krever administratorrettigheter (UAC-forespørsel). Skriveren bruker den innebygde \"Microsoft Print to PDF\"-driveren.",
-    "installing": "Installerer...",
-    "removing": "Fjerner...",
-    "installationFailed": "Installasjon mislyktes",
-    "removalFailed": "Fjerning mislyktes",
-    "failedToInstall": "Kunne ikke installere virtuell skriver:",
-    "failedToRemove": "Kunne ikke fjerne virtuell skriver:"
   },
   "pageDisplay": {
     "rendering": "Gjengivelse",

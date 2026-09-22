@@ -8,7 +8,6 @@
     "markup": "Markup",
     "behavior": "Perilaku",
     "fileAssociation": "Asosiasi File",
-    "virtualPrinter": "Printer Virtual",
     "pageDisplay": "Tampilan Halaman"
   },
   "resetToDefaults": "Atur Ulang ke Bawaan",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "Nama Penulis",
     "language": "Bahasa",
     "interfaceLanguage": "Bahasa Antarmuka",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "Koneksi AI (MCP)",
     "aiLinkAllow": "Izinkan asisten AI (seperti Claude Desktop) mengoperasikan aplikasi ini",
     "aiLinkPort": "Port",
@@ -157,20 +154,6 @@
     "linuxInstructions": "Untuk mengatur Open PDF Studio sebagai penampil PDF bawaan di Linux:\n\nJalankan di terminal:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Periksa Finder > Dapatkan Info",
     "notSet": "Belum diatur"
-  },
-  "virtualPrinter": {
-    "title": "Printer Virtual",
-    "description": "Instal \"Open PDF Studio\" sebagai printer Windows. Ketika Anda mencetak dari aplikasi apa pun (Word, Chrome, Notepad, dll.) dan memilih printer ini, PDF hasil keluaran akan terbuka secara otomatis di aplikasi ini.",
-    "status": "Status:",
-    "installButton": "Instal Printer Virtual",
-    "removeButton": "Hapus Printer Virtual",
-    "installNote": "Instalasi memerlukan hak administrator (prompt UAC). Printer menggunakan driver bawaan \"Microsoft Print to PDF\".",
-    "installing": "Menginstal...",
-    "removing": "Menghapus...",
-    "installationFailed": "Instalasi gagal",
-    "removalFailed": "Penghapusan gagal",
-    "failedToInstall": "Gagal menginstal printer virtual:",
-    "failedToRemove": "Gagal menghapus printer virtual:"
   },
   "pageDisplay": {
     "rendering": "Rendering",

@@ -8,7 +8,6 @@
     "markup": "Znaczniki",
     "behavior": "Zachowanie",
     "fileAssociation": "Skojarzenie plików",
-    "virtualPrinter": "Drukarka wirtualna",
     "pageDisplay": "Wyświetlanie strony"
   },
   "resetToDefaults": "Przywróć ustawienia domyślne",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "Nazwa autora",
     "language": "Język",
     "interfaceLanguage": "Język interfejsu",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "Połączenie AI (MCP)",
     "aiLinkAllow": "Zezwól asystentom AI (np. Claude Desktop) na obsługę tej aplikacji",
     "aiLinkPort": "Port",
@@ -140,20 +137,6 @@
     "linuxInstructions": "Aby ustawić Open PDF Studio jako domyślną przeglądarkę PDF na Linux:\n\nUruchom w terminalu:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Sprawdź Finder > Informacje",
     "notSet": "Nie ustawiono"
-  },
-  "virtualPrinter": {
-    "title": "Drukarka wirtualna",
-    "description": "Zainstaluj \"Open PDF Studio\" jako drukarkę systemu Windows. Gdy drukujesz z dowolnej aplikacji (Word, Chrome, Notatnik itp.) i wybierzesz tę drukarkę, wynikowy plik PDF otworzy się automatycznie w tej aplikacji.",
-    "status": "Status:",
-    "installButton": "Zainstaluj drukarkę wirtualną",
-    "removeButton": "Usuń drukarkę wirtualną",
-    "installNote": "Instalacja wymaga uprawnień administratora (monit UAC). Drukarka wykorzystuje wbudowany sterownik \"Microsoft Print to PDF\".",
-    "installing": "Instalowanie...",
-    "removing": "Usuwanie...",
-    "installationFailed": "Instalacja nie powiodła się",
-    "removalFailed": "Usunięcie nie powiodło się",
-    "failedToInstall": "Nie udało się zainstalować drukarki wirtualnej:",
-    "failedToRemove": "Nie udało się usunąć drukarki wirtualnej:"
   },
   "pageDisplay": {
     "rendering": "Renderowanie",

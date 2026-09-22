@@ -8,7 +8,6 @@
     "markup": "İşaretleme",
     "behavior": "Davranış",
     "fileAssociation": "Dosya İlişkilendirme",
-    "virtualPrinter": "Sanal Yazıcı",
     "pageDisplay": "Sayfa Görünümü"
   },
   "resetToDefaults": "Varsayılanlara Sıfırla",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "Yazar Adı",
     "language": "Dil",
     "interfaceLanguage": "Arayüz Dili",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "Yapay zekâ bağlantısı (MCP)",
     "aiLinkAllow": "Yapay zekâ asistanlarının (Claude Desktop gibi) bu uygulamayı kullanmasına izin ver",
     "aiLinkPort": "Bağlantı noktası",
@@ -140,20 +137,6 @@
     "linuxInstructions": "Linux'ta Open PDF Studio'yu varsayılan PDF görüntüleyici olarak ayarlamak için:\n\nTerminalde çalıştırın:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Finder > Bilgi Al seçeneğini kontrol edin",
     "notSet": "Ayarlanmadı"
-  },
-  "virtualPrinter": {
-    "title": "Sanal Yazıcı",
-    "description": "\"Open PDF Studio\"yu bir Windows yazıcısı olarak yükleyin. Herhangi bir uygulamadan (Word, Chrome, Not Defteri vb.) yazdırıp bu yazıcıyı seçtiğinizde, çıktı PDF dosyası bu uygulamada otomatik olarak açılacaktır.",
-    "status": "Durum:",
-    "installButton": "Sanal Yazıcıyı Yükle",
-    "removeButton": "Sanal Yazıcıyı Kaldır",
-    "installNote": "Yükleme için yönetici ayrıcalıkları (UAC istemi) gereklidir. Yazıcı, yerleşik \"Microsoft Print to PDF\" sürücüsünü kullanır.",
-    "installing": "Yükleniyor...",
-    "removing": "Kaldırılıyor...",
-    "installationFailed": "Yükleme başarısız oldu",
-    "removalFailed": "Kaldırma başarısız oldu",
-    "failedToInstall": "Sanal yazıcı yüklenemedi:",
-    "failedToRemove": "Sanal yazıcı kaldırılamadı:"
   },
   "pageDisplay": {
     "rendering": "İşleme",

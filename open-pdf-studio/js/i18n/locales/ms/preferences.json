@@ -8,7 +8,6 @@
     "markup": "Penanda",
     "behavior": "Kelakuan",
     "fileAssociation": "Perkaitan Fail",
-    "virtualPrinter": "Pencetak Maya",
     "pageDisplay": "Paparan Halaman"
   },
   "resetToDefaults": "Tetapkan Semula kepada Lalai",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "Nama Pengarang",
     "language": "Bahasa",
     "interfaceLanguage": "Bahasa Antaramuka",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "Sambungan AI (MCP)",
     "aiLinkAllow": "Benarkan pembantu AI (seperti Claude Desktop) mengendalikan aplikasi ini",
     "aiLinkPort": "Port",
@@ -157,20 +154,6 @@
     "linuxInstructions": "Untuk menetapkan Open PDF Studio sebagai pemapar PDF lalai pada Linux:\n\nJalankan dalam terminal:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Semak Finder > Dapatkan Maklumat",
     "notSet": "Tidak ditetapkan"
-  },
-  "virtualPrinter": {
-    "title": "Pencetak Maya",
-    "description": "Pasang \"Open PDF Studio\" sebagai pencetak Windows. Apabila anda mencetak dari mana-mana aplikasi (Word, Chrome, Notepad, dll.) dan memilih pencetak ini, output PDF akan dibuka secara automatik dalam aplikasi ini.",
-    "status": "Status:",
-    "installButton": "Pasang Pencetak Maya",
-    "removeButton": "Buang Pencetak Maya",
-    "installNote": "Pemasangan memerlukan keistimewaan pentadbir (gesaan UAC). Pencetak menggunakan pemacu terbina dalam \"Microsoft Print to PDF\".",
-    "installing": "Memasang...",
-    "removing": "Membuang...",
-    "installationFailed": "Pemasangan gagal",
-    "removalFailed": "Pembuangan gagal",
-    "failedToInstall": "Gagal memasang pencetak maya:",
-    "failedToRemove": "Gagal membuang pencetak maya:"
   },
   "pageDisplay": {
     "rendering": "Rendering",

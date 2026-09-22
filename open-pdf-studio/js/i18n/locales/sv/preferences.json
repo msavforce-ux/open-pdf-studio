@@ -8,7 +8,6 @@
     "markup": "Markering",
     "behavior": "Beteende",
     "fileAssociation": "Filassociation",
-    "virtualPrinter": "Virtuell skrivare",
     "pageDisplay": "Sidvisning"
   },
   "resetToDefaults": "Återställ till standard",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "Namn för författare",
     "language": "Språk",
     "interfaceLanguage": "Gränssnittspråk",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "AI-koppling (MCP)",
     "aiLinkAllow": "Tillåt AI-assistenter (som Claude Desktop) att styra den här appen",
     "aiLinkPort": "Port",
@@ -157,20 +154,6 @@
     "linuxInstructions": "För att ange Open PDF Studio som standard-PDF-visare på Linux:\n\nKör i terminalen:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Kontrollera Finder > Visa info",
     "notSet": "Inte angiven"
-  },
-  "virtualPrinter": {
-    "title": "Virtuell skrivare",
-    "description": "Installera \"Open PDF Studio\" som en Windows-skrivare. När du skriver ut från valfritt program (Word, Chrome, Anteckningar, etc.) och väljer denna skrivare, öppnas den resulterande PDF-filen automatiskt i denna app.",
-    "status": "Status:",
-    "installButton": "Installera virtuell skrivare",
-    "removeButton": "Ta bort virtuell skrivare",
-    "installNote": "Installation kräver administratörsbehörighet (UAC-prompt). Skrivaren använder den inbyggda drivrutinen \"Microsoft Print to PDF\".",
-    "installing": "Installerar...",
-    "removing": "Tar bort...",
-    "installationFailed": "Installationen misslyckades",
-    "removalFailed": "Borttagningen misslyckades",
-    "failedToInstall": "Kunde inte installera virtuell skrivare:",
-    "failedToRemove": "Kunde inte ta bort virtuell skrivare:"
   },
   "pageDisplay": {
     "rendering": "Rendering",

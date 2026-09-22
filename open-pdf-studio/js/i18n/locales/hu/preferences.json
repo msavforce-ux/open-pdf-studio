@@ -8,7 +8,6 @@
     "markup": "Jelölés",
     "behavior": "Viselkedés",
     "fileAssociation": "Fájltársítás",
-    "virtualPrinter": "Virtuális nyomtató",
     "pageDisplay": "Oldal megjelenítése"
   },
   "resetToDefaults": "Alapértelmezések visszaállítása",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "Szerzőnév",
     "language": "Nyelv",
     "interfaceLanguage": "Felület nyelve",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "MI-kapcsolat (MCP)",
     "aiLinkAllow": "MI-asszisztensek (pl. Claude Desktop) vezérelhetik ezt az alkalmazást",
     "aiLinkPort": "Port",
@@ -157,20 +154,6 @@
     "linuxInstructions": "A Open PDF Studio beállítása alapértelmezett PDF megjelenítőként Linux rendszeren:\n\nFuttassa a terminálban:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Ellenőrizze a Finder > Információ részben",
     "notSet": "Nincs beállítva"
-  },
-  "virtualPrinter": {
-    "title": "Virtuális nyomtató",
-    "description": "Telepítse a \"Open PDF Studio\" alkalmazást Windows nyomtatóként. Ha bármely alkalmazásból (Word, Chrome, Jegyzettömb stb.) nyomtat, és ezt a nyomtatót választja, a létrejövő PDF automatikusan megnyílik ebben az alkalmazásban.",
-    "status": "Állapot:",
-    "installButton": "Virtuális nyomtató telepítése",
-    "removeButton": "Virtuális nyomtató eltávolítása",
-    "installNote": "A telepítéshez rendszergazdai jogosultság szükséges (UAC kérés). A nyomtató a beépített \"Microsoft Print to PDF\" illesztőprogramot használja.",
-    "installing": "Telepítés...",
-    "removing": "Eltávolítás...",
-    "installationFailed": "A telepítés sikertelen",
-    "removalFailed": "Az eltávolítás sikertelen",
-    "failedToInstall": "Nem sikerült telepíteni a virtuális nyomtatót:",
-    "failedToRemove": "Nem sikerült eltávolítani a virtuális nyomtatót:"
   },
   "pageDisplay": {
     "rendering": "Megjelenítés",

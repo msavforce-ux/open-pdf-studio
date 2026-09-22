@@ -8,7 +8,6 @@
     "markup": "סימון",
     "behavior": "התנהגות",
     "fileAssociation": "שיוך קבצים",
-    "virtualPrinter": "מדפסת וירטואלית",
     "pageDisplay": "תצוגת עמוד"
   },
   "resetToDefaults": "איפוס לברירת מחדל",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "שם מחבר",
     "language": "שפה",
     "interfaceLanguage": "שפת ממשק",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "חיבור בינה מלאכותית (MCP)",
     "aiLinkAllow": "לאפשר לעוזרי בינה מלאכותית (כמו Claude Desktop) להפעיל את היישום",
     "aiLinkPort": "יציאה",
@@ -157,20 +154,6 @@
     "linuxInstructions": "כדי להגדיר את Open PDF Studio כמציג PDF ברירת מחדל ב-Linux:\n\nהפעל בטרמינל:\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "בדוק Finder > קבל מידע",
     "notSet": "לא הוגדר"
-  },
-  "virtualPrinter": {
-    "title": "מדפסת וירטואלית",
-    "description": "התקנת \"Open PDF Studio\" כמדפסת Windows. כאשר תדפיס מכל יישום (Word, Chrome, Notepad וכו') ותבחר מדפסת זו, קובץ ה-PDF שייווצר ייפתח אוטומטית ביישום זה.",
-    "status": "מצב:",
-    "installButton": "התקנת מדפסת וירטואלית",
-    "removeButton": "הסרת מדפסת וירטואלית",
-    "installNote": "ההתקנה דורשת הרשאות מנהל (בקשת UAC). המדפסת משתמשת במנהל ההתקן המובנה \"Microsoft Print to PDF\".",
-    "installing": "מתקין...",
-    "removing": "מסיר...",
-    "installationFailed": "ההתקנה נכשלה",
-    "removalFailed": "ההסרה נכשלה",
-    "failedToInstall": "נכשלה התקנת מדפסת וירטואלית:",
-    "failedToRemove": "נכשלה הסרת מדפסת וירטואלית:"
   },
   "pageDisplay": {
     "rendering": "עיבוד",

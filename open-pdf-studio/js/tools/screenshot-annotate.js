@@ -7,20 +7,15 @@
 // every existing feature works for free — drawing tools, Save/Save-As (PDF
 // export) and the Screenshot button (PNG/JPG export + copy back to clipboard).
 //
-// Two entry points:
-//   * an in-app action ("Annotate clipboard screenshot", File menu) — the
-//     reliable core path; the user makes a normal OS screenshot first, then
-//     triggers this;
-//   * an OPT-IN global PrtScn hotkey (Preferences → General) — the bonus path.
-//     Registration is driven from `set_prtscn_hotkey` in Rust; on press the
-//     backend brings the window forward and emits `prtscn-screenshot`, handled
-//     here.
+// Eén ingang: de actie "Annotate clipboard screenshot" in het Bestand-menu.
+// De gebruiker maakt eerst een gewone schermafdruk met het besturingssysteem,
+// en die wordt hier opgepakt.
 //
-// Windows note: intercepting PrtScn via a global hotkey can suppress the OS's
-// own "copy full screen to clipboard" behaviour, and on Windows 11 PrtScn may
-// be bound to the Snipping Tool. That is exactly why the hotkey is opt-in and
-// off by default, and why the in-app action (which reads whatever the user
-// already captured) is the primary, always-reliable route.
+// Er zat ook een optionele globale PrtScn-sneltoets op. Die is weggehaald: een
+// toepassing die een systeembrede toetsaanslag registreert is voor een EDR
+// niet te onderscheiden van een keylogger, en het scheelde de gebruiker één
+// toetsaanslag. Het besturingssysteem zet de afdruk zelf al op het klembord;
+// deze route leest wat daar staat.
 
 import { isTauri, invoke } from '../core/platform.js';
 import { state, getActiveDocument, imageCache } from '../core/state.js';
@@ -177,34 +172,3 @@ export async function annotateClipboardScreenshot({ delayMs = 0 } = {}) {
 }
 
 // ─── Global hotkey wiring ────────────────────────────────────────────────────
-let _listenerAttached = false;
-
-// Push the current preference to the Rust backend, which (un)registers the
-// PrtScn global hotkey. Safe to call repeatedly.
-export async function applyPrintScreenHotkeyPref() {
-  if (!isTauri()) return;
-  try {
-    await invoke('set_prtscn_hotkey', { enabled: !!state.preferences?.interceptPrintScreen });
-  } catch (e) {
-    console.warn('[screenshot-annotate] set_prtscn_hotkey failed:', e);
-  }
-}
-
-// One-time init from the app startup sequence: listen for the backend's
-// hotkey event and apply the persisted preference.
-export async function initScreenshotAnnotate() {
-  if (!isTauri()) return;
-  if (!_listenerAttached) {
-    try {
-      await window.__TAURI__.event.listen('prtscn-screenshot', () => {
-        // Small delay: give the OS time to finish putting the capture on the
-        // clipboard before we read it.
-        annotateClipboardScreenshot({ delayMs: 150 });
-      });
-      _listenerAttached = true;
-    } catch (e) {
-      console.warn('[screenshot-annotate] event listen failed:', e);
-    }
-  }
-  await applyPrintScreenHotkeyPref();
-}

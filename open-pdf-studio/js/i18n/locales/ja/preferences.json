@@ -8,7 +8,6 @@
     "markup": "マークアップ",
     "behavior": "動作",
     "fileAssociation": "ファイルの関連付け",
-    "virtualPrinter": "仮想プリンター",
     "pageDisplay": "ページ表示"
   },
   "resetToDefaults": "既定値に戻す",
@@ -22,8 +21,6 @@
     "defaultAuthorName": "著者名",
     "language": "言語",
     "interfaceLanguage": "インターフェース言語",
-    "screenshot": "Screenshot",
-    "interceptPrintScreen": "Intercept PrtScn for screenshot annotation",
     "aiLink": "AI連携（MCP）",
     "aiLinkAllow": "AIアシスタント（Claude Desktop など）にこのアプリの操作を許可する",
     "aiLinkPort": "ポート",
@@ -140,20 +137,6 @@
     "linuxInstructions": "Linux で Open PDF Studio を既定の PDF ビューアーに設定するには：\n\nターミナルで実行：\nxdg-mime default openpdfstudio.desktop application/pdf",
     "checkFinder": "Finder > 情報を見る を確認",
     "notSet": "未設定"
-  },
-  "virtualPrinter": {
-    "title": "仮想プリンター",
-    "description": "「Open PDF Studio」を Windows プリンターとしてインストールします。任意のアプリケーション（Word、Chrome、メモ帳など）から印刷してこのプリンターを選択すると、出力された PDF がこのアプリで自動的に開きます。",
-    "status": "状態：",
-    "installButton": "仮想プリンターをインストール",
-    "removeButton": "仮想プリンターを削除",
-    "installNote": "インストールには管理者権限（UAC プロンプト）が必要です。プリンターは組み込みの「Microsoft Print to PDF」ドライバーを使用します。",
-    "installing": "インストール中...",
-    "removing": "削除中...",
-    "installationFailed": "インストールに失敗しました",
-    "removalFailed": "削除に失敗しました",
-    "failedToInstall": "仮想プリンターのインストールに失敗しました：",
-    "failedToRemove": "仮想プリンターの削除に失敗しました："
   },
   "pageDisplay": {
     "rendering": "レンダリング",
